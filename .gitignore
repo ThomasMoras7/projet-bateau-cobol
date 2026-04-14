@@ -1,0 +1,11 @@
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Local Build artifacts
+*.exe
+*.obj
+# BUT allow everything in the compiler directory
+!gnu-cobol/**
