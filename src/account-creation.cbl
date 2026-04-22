@@ -46,7 +46,7 @@
 
            *> Open COUNTER file
            OPEN I-O COUNTER-FILE.
-           IF WS-ACCOUNTS-STATUS = "35"
+           IF WS-COUNTER-STATUS = "35"
                DISPLAY "Erreur : "
                DISPLAY "Impossible d'ouvrir ACCOUNTS-COUNTER.DAT"
                OPEN OUTPUT COUNTER-FILE
@@ -67,6 +67,7 @@
            MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
            MOVE LAST-ACCOUNT-ID TO ACCOUNT-COUNTER-RECORD
            REWRITE ACCOUNT-COUNTER-RECORD
+           DISPLAY "ID : " WS-ACCOUNT-ID
 
            *> Ask for name
            PERFORM UNTIL WS-ACCOUNT-NAME NOT EQUAL SPACES
