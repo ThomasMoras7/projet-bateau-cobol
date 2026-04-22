@@ -50,6 +50,8 @@
                DISPLAY "Erreur : "
                DISPLAY "Impossible d'ouvrir ACCOUNTS-COUNTER.DAT"
                OPEN OUTPUT COUNTER-FILE
+               MOVE 0 TO LAST-ACCOUNT-ID
+               WRITE ACCOUNT-COUNTER-RECORD
                CLOSE COUNTER-FILE
                OPEN I-O COUNTER-FILE
                DISPLAY "ACCOUNTS-COUNTER.DAT cree et ouvert avec succes"
