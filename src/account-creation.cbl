@@ -6,39 +6,89 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT ACCOUNTS-FILE ASSIGN TO "ACCOUNTS.DAT"
-                  ORGANIZATION IS SEQUENTIAL.
+                  ORGANIZATION IS SEQUENTIAL
+                  FILE STATUS IS WS-ACCOUNTS-STATUS.
+           SELECT COUNTER-FILE ASSIGN TO "ACCOUNTS-COUNTER.DAT"
+                  ORGANIZATION IS SEQUENTIAL
+                  FILE STATUS IS WS-COUNTER-STATUS.
 
        DATA DIVISION.
        FILE SECTION.
        FD ACCOUNTS-FILE.
        01 ACCOUNT-RECORD.
-           05 ACCOUNT-ID       PIC X(10).
+           05 ACCOUNT-ID       PIC 9(10).
            05 ACCOUNT-NAME     PIC X(20).
            05 ACCOUNT-BALANCE  PIC S9(10)V99.
+       FD COUNTER-FILE.
+       01 ACCOUNT-COUNTER-RECORD.
+           05 LAST-ACCOUNT-ID  PIC 9(10).
 
        WORKING-STORAGE SECTION.
        01 WS-ACCOUNT-RECORD.
-           05 WS-ACCOUNT-ID       PIC X(10)        VALUE "ACC001".
-           05 WS-ACCOUNT-NAME     PIC X(20)        VALUE "Jean Dupont".
-           05 WS-ACCOUNT-BALANCE  PIC S9(10)V99    VALUE 1000.00.
+           05 WS-ACCOUNT-ID       PIC X(10).
+           05 WS-ACCOUNT-NAME     PIC X(20).
+           05 WS-ACCOUNT-BALANCE  PIC S9(10)V99    VALUE 0.
+       01 WS-FILE-STATUS.
+           05 WS-ACCOUNTS-STATUS  PIC XX.
+           05 WS-COUNTER-STATUS   PIC XX.
 
        PROCEDURE DIVISION.
 
+           *> Open ACCOUNTS file
            OPEN EXTEND ACCOUNTS-FILE.
-           IF RETURN-CODE NOT EQUAL 0
+           IF WS-ACCOUNTS-STATUS = "35"
+               DISPLAY "Erreur : impossible d'ouvrir ACCOUNTS.DAT"
+               OPEN OUTPUT ACCOUNTS-FILE
                CLOSE ACCOUNTS-FILE
-               DISPLAY "Erreur. Impossible d'ouvrir ACCOUNTS.DAT"
-               STOP RUN
+               OPEN EXTEND ACCOUNTS-FILE
+               DISPLAY "ACCOUNTS.DAT cree et ouvert avec succes"
            END-IF.
 
+           *> Open COUNTER file
+           OPEN I-O COUNTER-FILE.
+           IF WS-ACCOUNTS-STATUS = "35"
+               DISPLAY "Erreur : "
+               DISPLAY "Impossible d'ouvrir ACCOUNTS-COUNTER.DAT"
+               OPEN OUTPUT COUNTER-FILE
+               CLOSE COUNTER-FILE
+               OPEN I-O COUNTER-FILE
+               DISPLAY "ACCOUNTS-COUNTER.DAT cree et ouvert avec succes"
+           END-IF.
+
+           *> Increment ID
+           DISPLAY "Recuperation de votre ID..."
+           READ COUNTER-FILE.
+               IF WS-COUNTER-STATUS = "10"
+                    DISPLAY "Erreur : ACCOUNTS-COUNTER.DAT illisible"
+                    MOVE 0 TO LAST-ACCOUNT-ID
+                    DISPLAY "ACCOUNTS-COUNTER repare avec succes"
+               END-IF.
+               ADD 1 TO LAST-ACCOUNT-ID
+           MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
+           MOVE LAST-ACCOUNT-ID TO ACCOUNT-COUNTER-RECORD
+           REWRITE ACCOUNT-COUNTER-RECORD
+
+           *> Ask for name
+           PERFORM UNTIL WS-ACCOUNT-NAME NOT EQUAL SPACES
+           DISPLAY "Entrez votre nom (20 caracteres max) : "
+           ACCEPT WS-ACCOUNT-NAME
+           IF WS-ACCOUNT-NAME EQUAL SPACES
+                   DISPLAY "Erreur : Le nom ne peut pas être vide."
+               END-IF
+           END-PERFORM.
+
+           *> Write new account
            WRITE ACCOUNT-RECORD FROM WS-ACCOUNT-RECORD.
            IF RETURN-CODE NOT EQUAL 0
                CLOSE ACCOUNTS-FILE
                DISPLAY "Erreur. Impossible d'ecrire ACCOUNTS.DAT"
                STOP RUN
            END-IF.
-s
+
+           *> Close all file
            CLOSE ACCOUNTS-FILE.
-           DISPLAY "Compte ACC001 ajoute avec succes !."
+           CLOSE COUNTER-FILE.
+
+           DISPLAY "Compte ajoute avec succes !"
            STOP RUN.
            
