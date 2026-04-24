@@ -6,7 +6,9 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT ACCOUNTS-FILE ASSIGN TO "ACCOUNTS.DAT"
-                  ORGANIZATION IS SEQUENTIAL
+                  ORGANIZATION IS INDEXED
+                  ACCESS MODE IS DYNAMIC
+                  RECORD KEY IS ACCOUNT-ID
                   FILE STATUS IS WS-ACCOUNTS-STATUS.
            SELECT COUNTER-FILE ASSIGN TO "ACCOUNTS-COUNTER.DAT"
                   ORGANIZATION IS SEQUENTIAL
@@ -35,12 +37,12 @@
        PROCEDURE DIVISION.
 
            *> Open ACCOUNTS file
-           OPEN EXTEND ACCOUNTS-FILE.
+           OPEN I-O ACCOUNTS-FILE.
            IF WS-ACCOUNTS-STATUS = "35"
                DISPLAY "Erreur : impossible d'ouvrir ACCOUNTS.DAT"
                OPEN OUTPUT ACCOUNTS-FILE
                CLOSE ACCOUNTS-FILE
-               OPEN EXTEND ACCOUNTS-FILE
+               OPEN I-O ACCOUNTS-FILE
                DISPLAY "ACCOUNTS.DAT cree et ouvert avec succes"
            END-IF.
 
@@ -94,4 +96,6 @@
 
            DISPLAY "Compte ajoute avec succes !"
            STOP RUN.
+
+           *> TODO: Passer aux fichiers indexés
            
