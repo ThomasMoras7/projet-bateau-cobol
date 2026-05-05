@@ -30,9 +30,8 @@
            05 WS-ACCOUNT-ID       PIC X(10).
            05 WS-ACCOUNT-NAME     PIC X(20).
            05 WS-ACCOUNT-BALANCE  PIC S9(10)V99    VALUE 0.
-       01 WS-FILE-STATUS.
-           05 WS-ACCOUNTS-STATUS  PIC XX.
-           05 WS-COUNTER-STATUS   PIC XX.
+       01 WS-ACCOUNTS-STATUS  PIC XX.
+       01 WS-COUNTER-STATUS   PIC XX.
 
        PROCEDURE DIVISION.
 
@@ -87,15 +86,12 @@
            IF RETURN-CODE NOT EQUAL 0
                CLOSE ACCOUNTS-FILE
                DISPLAY "Erreur. Impossible d'ecrire ACCOUNTS.DAT"
-               STOP RUN
+           ELSE
+                DISPLAY "Compte ajoute avec succes !"
            END-IF.
 
            *> Close all file
            CLOSE ACCOUNTS-FILE.
            CLOSE COUNTER-FILE.
 
-           DISPLAY "Compte ajoute avec succes !"
-           STOP RUN.
-
-           *> TODO: Passer aux fichiers indexés
-           
+           STOP RUN.           
