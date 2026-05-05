@@ -45,8 +45,10 @@
               INVALID KEY DISPLAY "Erreur : compte introuvable"
               NOT INVALID KEY
               DELETE ACCOUNTS-FILE
-                  INVALID KEY DISPLAY "Erreur : impossible de supprimer"
-                  NOT INVALID KEY DISPLAY "Compte supprime !"
+                  INVALID KEY
+                      DISPLAY "Erreur : impossible de supprimer"
+                  NOT INVALID
+                      KEY DISPLAY "Compte supprime avec succes !"
               END-DELETE
            END-READ.
 
