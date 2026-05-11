@@ -5,13 +5,15 @@
 | # | Category | Description | Priority | Status |
 |---|----------|-------------|----------|--------|
 | 1 | DRY | Extract shared file-open logic into a copybook | High | Pending |
-| 2 | DRY | Extract shared `ACCOUNT-RECORD` layout into a copybook | High | Pending |
-| 3 | Feature | Add account update/edit program (modify name or balance) | Medium | Pending |
-| 4 | Feature | Add main menu program that calls sub-programs | Medium | Pending |
-| 5 | Quality | Add input validation for deletion ID (numeric check) | Low | Pending |
-| 6 | Quality | Counter file not decremented on deletion — ID gaps accumulate | Low | Pending |
-| 7 | Portability | Move data files out of `bin/` into dedicated `data/` folder | Low | Pending |
-| 8 | UX | Standardize messages (currently mix French/error styles) | Low | Pending |
+| 2 | Feature | Add account update/edit program (modify name or balance) | Medium | Pending |
+| 3 | Feature | Add main menu program that calls sub-programs | Medium | Pending |
+| 4 | Quality | Add input validation for deletion ID (numeric check) | Low | Pending |
+| 5 | Quality | Counter file not decremented on deletion — ID gaps accumulate | Low | Pending |
+| 6 | Portability | Move data files out of `bin/` into dedicated `data/` folder | Low | Pending |
+| 7 | UX | Standardize messages (currently mix French/error styles) | Low | Pending |
+| 8 | VS Code | Add VS Code settings for COBOL extension, CPY search paths into the setup_env.ps1 | High | Pending | 
+| 9 | VS Code | Add script to compile everything | Medium | Pending |
+
 
 ## Details
 

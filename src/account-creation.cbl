@@ -17,10 +17,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD ACCOUNTS-FILE.
-       01 ACCOUNT-RECORD.
-           05 ACCOUNT-ID       PIC 9(10).
-           05 ACCOUNT-NAME     PIC X(20).
-           05 ACCOUNT-BALANCE  PIC S9(10)V99.
+       COPY "ACC-REC".
        FD COUNTER-FILE.
        01 ACCOUNT-COUNTER-RECORD.
            05 LAST-ACCOUNT-ID  PIC 9(10).
@@ -94,4 +91,4 @@
            CLOSE ACCOUNTS-FILE.
            CLOSE COUNTER-FILE.
 
-           STOP RUN.           
+           STOP RUN.
