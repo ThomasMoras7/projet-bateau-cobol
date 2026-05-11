@@ -1,46 +1,49 @@
-# COBOL Development Environment (Portable)
+# Projet Bateau — COBOL Account Manager
 
-This environment is pre-configured with **GnuCOBOL 3.2.0** (Community Build) for Windows.
+Portable COBOL development environment with **GnuCOBOL 3.2.0** on Windows.
+Three CLI programs manage bank accounts via indexed file I/O.
 
-## 📁 Project Structure
+## 🚀 Quick Start
 
-- `gnu-cobol/`: Portable compiler binaries, libraries, and includes.
-
-- `setup_env.ps1`: PowerShell script to initialize the environment in the current terminal session.
-- `src/`: Directory for COBOL source files.
-- `src/hello.cbl`: Simple Hello World source file.
-
-
-## 🚀 How to Use
-
-### 1. Initialize the Environment
-Before compiling or running any COBOL program, you **must** run the setup script in your PowerShell terminal to add the compiler to your PATH and set required variables:
-
+### 1. Initialize Environment
 ```powershell
 ./setup_env.ps1
 ```
 
-### 2. Compile a Program
-To compile `src/hello.cbl` into an executable:
-
+### 2. Compile All Programs
 ```powershell
-cobc -x src/hello.cbl
+cobc -x src/account-creation.cbl -o bin/account-creation.exe
+cobc -x src/account-deletion.cbl -o bin/account-deletion.exe
+cobc -x src/account-list.cbl -o bin/account-list.exe
 ```
 
-- `-x`: Builds an executable (instead of a shared object).
-- `-free`: (Optional) If you use free format instead of fixed format.
-
-### 3. Run the Program
+### 3. Run
 ```powershell
-./hello.exe
+./bin/account-creation.exe
+./bin/account-list.exe
+./bin/account-deletion.exe
 ```
+
+## 📁 Project Structure
+
+| Path | Description |
+|------|-------------|
+| `gnu-cobol/` | Portable compiler binaries, libs, includes |
+| `setup_env.ps1` | PowerShell env initializer (PATH, COB vars) |
+| `src/` | COBOL source files |
+| `bin/` | Compiled executables + data files |
+| `docs/` | Project wiki |
 
 ## 🛠 Recommended VS Code Extensions
 
-For a clean and productive experience, install these extensions from the VS Code Marketplace:
+1. **[COBOL](https://marketplace.visualstudio.com/items?itemName=bitlang.cobol)** (bitlang) — Syntax highlighting, snippets
+2. **[COBOL Language Support](https://marketplace.visualstudio.com/items?itemName=broadcom.cobol-language-support)** (Broadcom) — Go-to-definition, linting
 
-1.  **[COBOL](https://marketplace.visualstudio.com/items?itemName=bitlang.cobol)** (by bitlang): Syntax highlighting, snippets, and basic linting.
-2.  **[COBOL Language Support](https://marketplace.visualstudio.com/items?itemName=broadcom.cobol-language-support)** (by Broadcom): Advanced features like go-to-definition and linting.
+## 📝 Notes
 
-## 📝 Configuration Note
-This setup was manually extracted and localized in `cobol-workspace`. The `setup_env.ps1` script dynamically detects its location, making it truly portable.
+- `setup_env.ps1` auto-detects its own location → fully portable
+- Data files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`) auto-created on first run
+
+## 📖 Documentation
+
+Full wiki → [docs/Index.md](docs/Index.md)
