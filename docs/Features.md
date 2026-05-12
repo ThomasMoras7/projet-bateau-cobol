@@ -17,6 +17,11 @@
 - Reads all accounts sequentially from data file
 - Displays ID, name, and balance for each record
 
+### Searching
+- Prompts user for account ID
+- Looks up account by primary key
+- Displays name and balance or error if not found
+
 ## Data Persistence
 - All data stored in local binary files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`)
 - Auto-creation of data files on first run if missing

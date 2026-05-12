@@ -7,3 +7,4 @@ Each program standalone CLI executable. No parameters — all interaction via `D
 | [account-creation](API-AccountCreation.md) | `src/account-creation.cbl` | Create new account with auto-ID |
 | [account-deletion](API-AccountDeletion.md) | `src/account-deletion.cbl` | Delete account by ID |
 | [account-list](API-AccountList.md) | `src/account-list.cbl` | List all stored accounts |
+| [search-account-balance](API-SearchAccountBalance.md) | `src/search-account-balance.cbl` | Search balance by ID |

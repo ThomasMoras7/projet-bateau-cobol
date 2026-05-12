@@ -4,7 +4,7 @@
 
 | # | Category | Description | Priority | Status |
 |---|----------|-------------|----------|--------|
-| 1 | DRY | Extract shared file-open logic into a copybook | High | Pending |
+| 1 | DRY | Extract shared file-open logic into a copybook (ex: opening accounts file) | High | Pending |
 | 2 | Feature | Add account update/edit program (modify name or balance) | Medium | Pending |
 | 3 | Feature | Add main menu program that calls sub-programs | Medium | Pending |
 | 4 | Quality | Add input validation for deletion ID (numeric check) | Low | Pending |
@@ -13,6 +13,7 @@
 | 7 | UX | Standardize messages (currently mix French/error styles) | Low | Pending |
 | 8 | VS Code | Add VS Code settings for COBOL extension, CPY search paths into the setup_env.ps1 | High | Pending | 
 | 9 | VS Code | Add script to compile everything | Medium | Pending |
+| 10 | Arquitecture | Force data to be created and opened in the same directory, independently from the current working directory | High | Pending |
 
 
 ## Details

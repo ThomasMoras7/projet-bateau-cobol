@@ -22,12 +22,14 @@ Projet Bateau/
 ├── src/                       # COBOL source files
 │   ├── account-creation.cbl   #   Create new account
 │   ├── account-deletion.cbl   #   Delete account by ID
-│   └── account-list.cbl       #   List all accounts
+│   ├── account-list.cbl       #   List all accounts
+│   └── search-account-balance.cbl # Search balance by ID
 │
 ├── bin/                       # Build output + data files
 │   ├── account-creation.exe   #   (gitignored)
 │   ├── account-deletion.exe   #   (gitignored)
 │   ├── account-list.exe       #   (gitignored)
+│   ├── search-account-balance.exe # (gitignored)
 │   ├── ACCOUNTS.DAT           #   Indexed account records
 │   └── ACCOUNTS-COUNTER.DAT   #   Sequential ID counter
 │
