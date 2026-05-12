@@ -23,13 +23,15 @@ Projet Bateau/
 │   ├── account-creation.cbl   #   Create new account
 │   ├── account-deletion.cbl   #   Delete account by ID
 │   ├── account-list.cbl       #   List all accounts
-│   └── search-account-balance.cbl # Search balance by ID
+│   ├── search-account-balance.cbl # Search balance by ID
+│   └── transfer-money.cbl     #   Transfer between accounts
 │
 ├── bin/                       # Build output + data files
 │   ├── account-creation.exe   #   (gitignored)
 │   ├── account-deletion.exe   #   (gitignored)
 │   ├── account-list.exe       #   (gitignored)
 │   ├── search-account-balance.exe # (gitignored)
+│   ├── transfer-money.exe     #   (gitignored)
 │   ├── ACCOUNTS.DAT           #   Indexed account records
 │   └── ACCOUNTS-COUNTER.DAT   #   Sequential ID counter
 │

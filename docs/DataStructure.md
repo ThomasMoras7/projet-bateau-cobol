@@ -53,5 +53,17 @@ Sequential file. Stores single record tracking last assigned ID.
 
 | Variable | PIC | Purpose |
 |----------|-----|---------|
+| WS-ACCOUNTS-STATUS | XX | File status |
+| WS-END-OF-FILE-FLAG | 9 | EOF flag (88-level: 0=not EOF, 1=EOF) |
+
+### transfer-money.cbl
+
+| Variable | PIC | Purpose |
+|----------|-----|---------|
+| `WS-SOURCE-ID` | `9(10)` | Source account ID |
+| `WS-DESTINATION-ID` | `9(10)` | Destination account ID |
+| `WS-AMOUNT` | `9(10)V99` | Amount to transfer |
+| `WS-SOURCE-BALANCE` | `S9(10)V99` | Cached source balance |
+| `WS-DESTINATION-BALANCE` | `S9(10)V99` | Cached destination balance |
 | `WS-ACCOUNTS-STATUS` | `XX` | File status |
-| `WS-END-OF-FILE-FLAG` | `9` | EOF flag (88-level: 0=not EOF, 1=EOF) |
+

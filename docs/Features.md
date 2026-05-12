@@ -22,6 +22,10 @@
 - Looks up account by primary key
 - Displays name and balance or error if not found
 
+### Transferring
+- Prompts for source and destination IDs
+- Updates both accounts atomically (logic-level)
+
 ## Data Persistence
 - All data stored in local binary files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`)
 - Auto-creation of data files on first run if missing
