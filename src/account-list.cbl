@@ -14,10 +14,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD ACCOUNTS-FILE.
-       01 ACCOUNT-RECORD.
-           05 ACCOUNT-ID       PIC 9(10).
-           05 ACCOUNT-NAME     PIC X(20).
-           05 ACCOUNT-BALANCE  PIC S9(10)V99.
+       COPY "ACC-REC".
 
        WORKING-STORAGE SECTION.
        01 WS-ACCOUNTS-STATUS       PIC XX.

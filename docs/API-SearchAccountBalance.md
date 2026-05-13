@@ -1,7 +1,7 @@
-# account-deletion
+# search-account-balance
 
 ## Overview
-Deletes an existing account record by ID.
+Retrieves and displays the balance of a specific account by its ID.
 
 ## Data
 
@@ -9,7 +9,7 @@ Deletes an existing account record by ID.
 
 | File | Mode | Role |
 |------|------|------|
-| `ACCOUNTS.DAT` | I-O | Read and delete account record |
+| `ACCOUNTS.DAT` | I-O | Read record by key |
 
 #### ACCOUNTS
 
@@ -17,22 +17,24 @@ Deletes an existing account record by ID.
 |----------|------|-----------|-------|
 | `ACCOUNT-RECORD` | PIC X(35) | 01 | Record for ACCOUNTS.DAT |
 | `ACCOUNT-ID` | PIC 9(5) | 05 | Primary key |
+| `ACCOUNT-NAME` | PIC X(20) | 05 | Account name |
+| `ACCOUNT-BALANCE` | PIC S9(10)V99 | 05 | Account balance |
 
 ### Workspace
 
 | Variable | Type | Structure | Usage |
 |----------|------|-----------|-------|
-| `WS-ACCOUNT-TO-DELETE-ID` | PIC 9(10) | 01 | User input for ID to delete |
+| `WS-SEARCH-ID` | PIC 9(10) | 01 | User input for ID to search |
 | `WS-ACCOUNTS-STATUS` | PIC X(2) | 01 | File status codes |
 
 ## Flow
 
 1. Open `ACCOUNTS.DAT` (I-O).
-2. Prompt user for account ID to delete.
+2. Prompt user for account ID to search.
 3. Move input to `ACCOUNT-ID`.
-4. Read by key.
-5. If found, delete record.
-6. Display result message.
+4. Read record by key.
+5. If found, display balance.
+6. If not found, display error message.
 7. Close file.
 
 ### Error Handling
@@ -40,13 +42,12 @@ Deletes an existing account record by ID.
 | Condition | Behavior |
 |-----------|----------|
 | `ACCOUNTS.DAT` missing (status 35) | Auto-create, reopen |
-| Account not found (INVALID KEY) | Display error "compte introuvable" |
-| Delete failure | Display error message |
+| Account not found (INVALID KEY) | Display "Account not found" |
 
 ## Rules
 
-- Account must exist to be deleted.
+- Search is performed by exact ID match.
 
 ## Output
 
-Success or failure messages.
+Account balance or error message.

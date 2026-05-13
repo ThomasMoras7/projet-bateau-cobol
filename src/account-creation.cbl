@@ -17,10 +17,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD ACCOUNTS-FILE.
-       01 ACCOUNT-RECORD.
-           05 ACCOUNT-ID       PIC 9(10).
-           05 ACCOUNT-NAME     PIC X(20).
-           05 ACCOUNT-BALANCE  PIC S9(10)V99.
+       COPY "ACC-REC".
        FD COUNTER-FILE.
        01 ACCOUNT-COUNTER-RECORD.
            05 LAST-ACCOUNT-ID  PIC 9(10).
@@ -67,9 +64,9 @@
                     DISPLAY "ACCOUNTS-COUNTER repare avec succes"
                END-IF.
                ADD 1 TO LAST-ACCOUNT-ID
-           MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
            MOVE LAST-ACCOUNT-ID TO ACCOUNT-COUNTER-RECORD
            REWRITE ACCOUNT-COUNTER-RECORD
+           MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
            DISPLAY "ID : " WS-ACCOUNT-ID
 
            *> Ask for name
@@ -94,4 +91,4 @@
            CLOSE ACCOUNTS-FILE.
            CLOSE COUNTER-FILE.
 
-           STOP RUN.           
+           STOP RUN.
