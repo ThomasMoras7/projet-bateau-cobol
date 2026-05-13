@@ -64,9 +64,9 @@
                     DISPLAY "ACCOUNTS-COUNTER repare avec succes"
                END-IF.
                ADD 1 TO LAST-ACCOUNT-ID
-           MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
            MOVE LAST-ACCOUNT-ID TO ACCOUNT-COUNTER-RECORD
            REWRITE ACCOUNT-COUNTER-RECORD
+           MOVE LAST-ACCOUNT-ID TO WS-ACCOUNT-ID
            DISPLAY "ID : " WS-ACCOUNT-ID
 
            *> Ask for name

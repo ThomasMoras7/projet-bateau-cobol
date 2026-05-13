@@ -12,8 +12,7 @@
 | 6 | Portability | Move data files out of `bin/` into dedicated `data/` folder | Low | Pending |
 | 7 | UX | Standardize messages (currently mix French/error styles) | Low | Pending |
 | 8 | VS Code | Add VS Code settings for COBOL extension, CPY search paths into the setup_env.ps1 | High | Pending | 
-| 9 | VS Code | Add script to compile everything | Medium | Pending |
-| 10 | Arquitecture | Force data to be created and opened in the same directory, independently from the current working directory | High | Pending |
+| 9 | Architecture | Force data creation in same directory as exe | High | Pending |
 
 
 ## Details

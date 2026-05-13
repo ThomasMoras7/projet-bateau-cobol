@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.0 — Account Operations & Tooling
+
+### Added
+- `search-account-balance.cbl` — search balance by ID
+- `transfer-money.cbl` — transfer funds between two accounts
+- `build.ps1` — automated build script for all programs
+- Standardized API documentation model
+
+### Changed
+- Improved wiki (Index, Features, Architecture)
+- Harmonized all API documentation files
+
 ## v0.1.0 — Initial Prototype
 
 ### Added
