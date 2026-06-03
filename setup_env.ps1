@@ -30,6 +30,22 @@ if (Test-Path $tzPath) {
     $env:TZDIR = $tzPath
 }
 
+# VS Code configuration — copybook search paths for COBOL extension
+$vscodeDir = Join-Path $PSScriptRoot ".vscode"
+$settingsFile = Join-Path $vscodeDir "settings.json"
+
+if (-not (Test-Path $vscodeDir)) {
+    New-Item -ItemType Directory -Path $vscodeDir -Force | Out-Null
+}
+
+$settings = @{
+    "cobol-lsp.cpy-manager.paths-local" = @(
+        "src/copybooks"
+    )
+}
+$settings | ConvertTo-Json | Set-Content -Path $settingsFile -Force
+Write-Host "[VS Code] $settingsFile updated (overwritten)"
+
 Write-Host "----------------------------------------------------"
 Write-Host " GnuCOBOL Portable Environment Initialized"
 Write-Host "----------------------------------------------------"

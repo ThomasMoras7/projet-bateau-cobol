@@ -43,6 +43,7 @@ cobc -x src/account-list.cbl -o bin/account-list.exe
 
 - `setup_env.ps1` auto-detects its own location → fully portable
 - Data files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`) auto-created on first run
+- **`setup_env.ps1` overwrites `.vscode/settings.json`** on every run (VS Code config is generated, not hand-edited)
 
 ## 📖 Documentation
 
