@@ -23,6 +23,7 @@ Projet Bateau/
 │   ├── account-creation.cbl   #   Create new account
 │   ├── account-deletion.cbl   #   Delete account by ID
 │   ├── account-list.cbl       #   List all accounts
+│   ├── history-list.cbl       #   View transaction journal
 │   ├── search-account-balance.cbl # Search balance by ID
 │   └── transfer-money.cbl     #   Transfer between accounts
 │
@@ -30,10 +31,13 @@ Projet Bateau/
 │   ├── account-creation.exe   #   (gitignored)
 │   ├── account-deletion.exe   #   (gitignored)
 │   ├── account-list.exe       #   (gitignored)
+│   ├── history-list.exe       #   (gitignored)
 │   ├── search-account-balance.exe # (gitignored)
 │   ├── transfer-money.exe     #   (gitignored)
 │   ├── ACCOUNTS.DAT           #   Indexed account records
-│   └── ACCOUNTS-COUNTER.DAT   #   Sequential ID counter
+│   ├── ACCOUNTS-COUNTER.DAT   #   Sequential account ID counter
+│   ├── TRANSACTIONS.DAT       #   Indexed transaction journal
+│   └── TRANSACTIONS-COUNTER.DAT # Sequential transaction ID counter
 │
 └── docs/                      # Project wiki
     ├── Index.md
@@ -49,5 +53,5 @@ Projet Bateau/
 
 - **One program per operation** — each `.cbl` file standalone executable, no shared runtime
 - **Flat structure** — no nested modules, copybooks, or subprograms
-- **File-based persistence** — indexed `ACCOUNTS.DAT` for keyed access, sequential `ACCOUNTS-COUNTER.DAT` for ID generation
+- **File-based persistence** — indexed `ACCOUNTS.DAT` for keyed access, `TRANSACTIONS.DAT` for transaction journal, sequential counter files for ID generation
 - **Portable toolchain** — `gnu-cobol/` directory self-contained, `setup_env.ps1` dynamically resolves paths

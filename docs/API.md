@@ -9,3 +9,4 @@ Each program standalone CLI executable. No parameters — all interaction via `D
 | [account-list](API-AccountList.md) | `src/account-list.cbl` | List all stored accounts |
 | [search-account-balance](API-SearchAccountBalance.md) | `src/search-account-balance.cbl` | Search balance by ID |
 | [transfer-money](API-TransferMoney.md) | `src/transfer-money.cbl` | Transfer money between accounts |
+| [history-list](API-HistoryList.md) | `src/history-list.cbl` | View transaction journal |

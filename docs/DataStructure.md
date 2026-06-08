@@ -30,6 +30,40 @@ Sequential file. Stores single record tracking last assigned ID.
 
 ---
 
+---
+
+## TRANSACTIONS.DAT
+
+Indexed file. Organization: `INDEXED`. Access mode: `DYNAMIC`. Record key: `TRANSACTION-ID`.
+
+### TRANSACTION-RECORD
+
+| Field | PIC | Size | Description |
+|-------|-----|------|-------------|
+| `TRANSACTION-ID` | `9(10)` | 10 digits | Sequential primary key, auto-incremented |
+| `SOURCE-ID` | `9(10)` | 10 digits | Source account ID |
+| `DESTINATION-ID` | `9(10)` | 10 digits | Destination account ID |
+| `TRANSACTION-AMOUNT` | `S9(10)V99` | Signed, 10 int + 2 dec | Transferred amount |
+| `TRANSACTION-TIMESTAMP` | `X(21)` | 21 chars | Date-time from `FUNCTION CURRENT-DATE` |
+
+**Total record size**: ~53 bytes
+
+---
+
+## TRANSACTIONS-COUNTER.DAT
+
+Sequential file. Stores single record tracking last assigned transaction ID.
+
+### TRANSACTION-COUNTER-RECORD
+
+| Field | PIC | Size | Description |
+|-------|-----|------|-------------|
+| `LAST-TRANSACTION-ID` | `9(10)` | 10 digits | Last assigned transaction ID |
+
+**Behavior**: read on startup, incremented by 1, rewritten after each logged transaction.
+
+---
+
 ## Working-Storage Variables
 
 ### account-creation.cbl
@@ -66,4 +100,13 @@ Sequential file. Stores single record tracking last assigned ID.
 | `WS-SOURCE-BALANCE` | `S9(10)V99` | Cached source balance |
 | `WS-DESTINATION-BALANCE` | `S9(10)V99` | Cached destination balance |
 | `WS-ACCOUNTS-STATUS` | `XX` | File status |
+| `WS-TRANSACTIONS-STATUS` | `XX` | Transaction file status |
+| `WS-TRANSACTIONS-COUNTER-STATUS` | `XX` | Transaction counter status |
+
+### history-list.cbl
+
+| Variable | PIC | Purpose |
+|----------|-----|---------|
+| `WS-TRANSACTIONS-STATUS` | `XX` | File status |
+| `WS-END-OF-FILE-FLAG` | `9` | EOF flag (88-level: 0=not EOF, 1=EOF) |
 
