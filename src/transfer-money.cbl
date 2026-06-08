@@ -5,19 +5,35 @@
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT ACCOUNTS-FILE ASSIGN TO "ACCOUNTS.DAT"
-           ORGANIZATION IS INDEXED
-           ACCESS MODE IS DYNAMIC
-           RECORD KEY IS ACCOUNT-ID
-           FILE STATUS IS WS-ACCOUNTS-STATUS.
+            SELECT ACCOUNTS-FILE ASSIGN TO "ACCOUNTS.DAT"
+            ORGANIZATION IS INDEXED
+            ACCESS MODE IS DYNAMIC
+            RECORD KEY IS ACCOUNT-ID
+            FILE STATUS IS WS-ACCOUNTS-STATUS.
+            SELECT TRANSACTIONS-FILE ASSIGN TO "TRANSACTIONS.DAT"
+            ORGANIZATION IS INDEXED
+            ACCESS MODE IS DYNAMIC
+            RECORD KEY IS TRANSACTION-ID
+            FILE STATUS IS WS-TRANSACTIONS-STATUS.
+            SELECT TRANSACTIONS-COUNTER-FILE
+                ASSIGN TO "TRANSACTIONS-COUNTER.DAT"
+            ORGANIZATION IS SEQUENTIAL
+            FILE STATUS IS WS-TRANSACTIONS-COUNTER-STATUS.
 
        DATA DIVISION.
        FILE SECTION.
        FD ACCOUNTS-FILE.
        COPY "ACC-REC".
+       FD TRANSACTIONS-FILE.
+       COPY "TRAN-REC".
+       FD TRANSACTIONS-COUNTER-FILE.
+       01 TRANSACTION-COUNTER-RECORD.
+           05 LAST-TRANSACTION-ID  PIC 9(10).
 
        WORKING-STORAGE SECTION.
        01 WS-ACCOUNTS-STATUS       PIC XX.
+       01 WS-TRANSACTIONS-STATUS          PIC XX.
+       01 WS-TRANSACTIONS-COUNTER-STATUS  PIC XX.
        01 WS-AMOUNT                PIC 9(10)V99.
        01 WS-DEBIT-STATUS          PIC X.
            88 DEBIT-SUCCESSFUL      VALUE "Y".
@@ -89,17 +105,68 @@
                ADD WS-AMOUNT TO WS-DESTINATION-BALANCE
                MOVE WS-DESTINATION-ACCOUNT-DATA TO ACCOUNT-RECORD
                REWRITE ACCOUNT-RECORD
-                   INVALID KEY
-                       DISPLAY "Erreur : credit impossible."
+                    INVALID KEY
+                        DISPLAY "Erreur : credit impossible."
                END-REWRITE
+
+               *> Open TRANSACTIONS file
+               OPEN I-O TRANSACTIONS-FILE
+               IF WS-TRANSACTIONS-STATUS = "35"
+                    DISPLAY "Erreur : impossible"
+                    DISPLAY "d'ouvrir TRANSACTIONS.DAT"
+                    OPEN OUTPUT TRANSACTIONS-FILE
+                    CLOSE TRANSACTIONS-FILE
+                    OPEN I-O TRANSACTIONS-FILE
+                    DISPLAY "TRANSACTIONS.DAT cree"
+                    DISPLAY "et ouvert avec succes"
+               END-IF
+
+               *> Open TRANSACTIONS-COUNTER file
+               OPEN I-O TRANSACTIONS-COUNTER-FILE
+               IF WS-TRANSACTIONS-COUNTER-STATUS = "35"
+                    DISPLAY "Erreur : impossible d'ouvrir"
+                    DISPLAY "TRANSACTIONS-COUNTER.DAT"
+                    OPEN OUTPUT TRANSACTIONS-COUNTER-FILE
+                    MOVE 0 TO LAST-TRANSACTION-ID
+                    WRITE TRANSACTION-COUNTER-RECORD
+                    CLOSE TRANSACTIONS-COUNTER-FILE
+                    OPEN I-O TRANSACTIONS-COUNTER-FILE
+                    DISPLAY "TRANSACTIONS-COUNTER.DAT cree"
+                    DISPLAY "et ouvert avec succes"
+               END-IF
+
+               *> Increment ID
+               DISPLAY "Generation de l'ID..."
+               READ TRANSACTIONS-COUNTER-FILE
+                   IF WS-TRANSACTIONS-COUNTER-STATUS = "10"
+                        DISPLAY "Erreur : TRANSACTIONS-COUNTER.DAT"
+                        DISPLAY "illisible"
+                        MOVE 0 TO LAST-TRANSACTION-ID
+                        DISPLAY "TRANSACTIONS-COUNTER repare avec"
+                        DISPLAY "succes"
+                   END-IF
+                   ADD 1 TO LAST-TRANSACTION-ID
+               MOVE LAST-TRANSACTION-ID TO TRANSACTION-ID
+               REWRITE TRANSACTION-COUNTER-RECORD
+   
+               *> Write transaction to history
+               MOVE WS-SOURCE-ID TO SOURCE-ID
+               MOVE WS-DESTINATION-ID TO DESTINATION-ID
+               MOVE WS-AMOUNT TO TRANSACTION-AMOUNT
+               MOVE FUNCTION CURRENT-DATE TO TRANSACTION-TIMESTAMP
+               WRITE TRANSACTION-RECORD
+               MOVE LAST-TRANSACTION-ID TO TRANSACTION-COUNTER-RECORD
+
+               *> Display New Balances
+               DISPLAY "Virement reussi."
+               DISPLAY "Nouveau solde du compte a debiter : "
+               DISPLAY WS-SOURCE-BALANCE
+               DISPLAY "Nouveau solde du compte a crediter : "
+               DISPLAY WS-DESTINATION-BALANCE
            END-IF.
 
-           *> Display New Balances
-           DISPLAY "Virement reussi."
-           DISPLAY "Nouveau solde du compte a debiter : "
-           DISPLAY WS-SOURCE-BALANCE
-           DISPLAY "Nouveau solde du compte a crediter : "
-           DISPLAY WS-DESTINATION-BALANCE
-
+           *> Close all files
            CLOSE ACCOUNTS-FILE.
+           CLOSE TRANSACTIONS-FILE.
+           CLOSE TRANSACTIONS-COUNTER-FILE.
            STOP RUN.

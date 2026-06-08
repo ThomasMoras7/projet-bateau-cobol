@@ -25,6 +25,14 @@
 ### Transferring
 - Prompts for source and destination IDs
 - Updates both accounts atomically (logic-level)
+- Logs every successful transfer to `TRANSACTIONS.DAT` with source, destination, amount, timestamp
+
+## History
+
+### Transaction Log
+- All transfers are recorded in a persistent journal
+- Each entry: ID, source, destination, amount, timestamp
+- Viewable via `history-list` program
 
 ## Data Persistence
 - All data stored in local binary files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`)

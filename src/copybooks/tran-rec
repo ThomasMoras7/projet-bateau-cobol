@@ -1,0 +1,6 @@
+        01 TRANSACTION-RECORD.
+            05 TRANSACTION-ID            PIC 9(10).
+            05 SOURCE-ID                 PIC 9(10).
+            05 DESTINATION-ID            PIC 9(10).
+            05 TRANSACTION-AMOUNT        PIC S9(10)V99.
+            05 TRANSACTION-TIMESTAMP     PIC X(21).

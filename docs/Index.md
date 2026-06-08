@@ -8,3 +8,4 @@
 | [API.md](API.md) | Program index — links to each program's details |
 | [Optimisations.md](Optimisations.md) | Possible improvements, status tracker |
 | [Changelog.md](Changelog.md) | Version history |
+| [API-HistoryList.md](API-HistoryList.md) | Transaction journal viewer |
