@@ -1,45 +1,63 @@
 # Features
 
-## Account Management
+## Run 1 — Navigation (Prologue)
 
-### Creation
-- Prompts user for a name (20 chars max, cannot be blank)
-- Auto-generates unique incremental ID via counter file
-- Initializes balance to 0
-- Persists account to indexed data file
+### Game Lifecycle
+- Title screen, always fresh start (no save/load)
+- No file I/O — everything in memory
 
-### Deletion
-- Prompts user for account ID
-- Looks up account by primary key
-- Deletes matching record or displays error if not found
+### Goods Trading
+- 5 types of goods with per-port prices
+- Prices randomized at game start from base values (±50 %)
+- Prices fluctuate on each departure (±10 %)
+- Buy at current port, sell at destination
 
-### Listing
-- Reads all accounts sequentially from data file
-- Displays ID, name, and balance for each record
+### Port Navigation
+- 5 fixed ports, each with name + flavor description
+- Display current port info + list of reachable ports
+- Navigate to any port in one turn
+- First visit marked as "new port!"
 
-### Searching
-- Prompts user for account ID
-- Looks up account by primary key
-- Displays name and balance or error if not found
+### Fuel
+- Each journey costs 30 in fuel
+- Fuel deducted when departing
+- Lose if you can't afford fuel
 
-### Transferring
-- Prompts for source and destination IDs
-- Updates both accounts atomically (logic-level)
-- Logs every successful transfer to `TRANSACTIONS.DAT` with source, destination, amount, timestamp
+### Win/Lose
+- Win: visit all 5 ports
+- Lose: money < 30 when trying to depart (can't afford fuel)
+- Game over screen with result message
 
-## History
+## Run 2 — Commerce + Persistence
 
-### Transaction Log
-- All transfers are recorded in a persistent journal
-- Each entry: ID, source, destination, amount, timestamp
-- Viewable via `history-list` program
+*See API-Run2.md for details*
 
-## Data Persistence
-- All data stored in local binary files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`)
-- Auto-creation of data files on first run if missing
-- Indexed file organization for keyed access
+- Save/load game state
+- Delivery contracts between ports
+- Economy: money tracking, treasury
+- Win condition: 5 profitable deliveries
+- Lose condition: bankruptcy
+
+## Run 3 — Fleet
+
+*See API-Run3.md for details*
+
+- Ship data model, shipyard module
+- Multiple ships, fleet management
+- Ship acquisition / maintenance
+
+## Run 4 — Full Integration
+
+*See API-Run4.md for details*
+
+- UI polish, balance tuning
+- Difficulty modes
 
 ## Portable Environment
+
 - Self-contained GnuCOBOL 3.2.0 distribution
 - Single PowerShell script sets up PATH and compiler variables
 - No system-wide installation required
+
+---
+**Legacy** — Archived banking features at [LegacyFeatures.md](legacy/LegacyFeatures.md).

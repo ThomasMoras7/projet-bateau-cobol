@@ -1,12 +1,12 @@
 # API — Program Index
 
-Each program standalone CLI executable. No parameters — all interaction via `DISPLAY`/`ACCEPT` prompts.
+| Program | File | Description |
+|---------|------|-------------|
+| [game](API-Run1.md) | `src/game.cbl` | Main program — game loop |
+| [initialisation](API-Run1.md) | `src/initialisation.cbl` | Initialize game state + goods prices |
+| [port-screen](API-Run1.md) | `src/port-screen.cbl` | Port display, goods market, navigation choice |
+| [end-screen](API-Run1.md) | `src/end-screen.cbl` | Win/lose end screen |
 
-| Program | Source | Description |
-|---------|--------|-------------|
-| [account-creation](API-AccountCreation.md) | `src/account-creation.cbl` | Create new account with auto-ID |
-| [account-deletion](API-AccountDeletion.md) | `src/account-deletion.cbl` | Delete account by ID |
-| [account-list](API-AccountList.md) | `src/account-list.cbl` | List all stored accounts |
-| [search-account-balance](API-SearchAccountBalance.md) | `src/search-account-balance.cbl` | Search balance by ID |
-| [transfer-money](API-TransferMoney.md) | `src/transfer-money.cbl` | Transfer money between accounts |
-| [history-list](API-HistoryList.md) | `src/history-list.cbl` | View transaction journal |
+## Legacy
+
+Archived banking API at [LegacyAPI.md](legacy/LegacyAPI.md).

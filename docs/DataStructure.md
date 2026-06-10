@@ -1,112 +1,90 @@
 # Data Structure
 
-## ACCOUNTS.DAT
+## GOODS-PRICES (in-memory table)
 
-Indexed file. Organization: `INDEXED`. Access mode: `DYNAMIC`. Record key: `ACCOUNT-ID`.
+Price table for the 5 goods across all 5 ports, randomly generated at game start. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
 
-### ACCOUNT-RECORD
+Proposed COBOL structure:
 
-| Field | PIC | Size | Description |
-|-------|-----|------|-------------|
-| `ACCOUNT-ID` | `9(10)` | 10 digits | Unique primary key, auto-incremented |
-| `ACCOUNT-NAME` | `X(20)` | 20 chars | Account holder name |
-| `ACCOUNT-BALANCE` | `S9(10)V99` | Signed, 10 int + 2 dec | Current balance (defaults to 0) |
+```
+01 WS-GOODS-LIST.
+    05 WS-GOOD OCCURS 5.
+        10 WS-GOOD-ID        PIC 9(10).
+        10 WS-GOOD-NAME      PIC X(20).
+        10 WS-GOOD-BASE-PRICE PIC 9(10)V99.
 
-**Total record size**: ~32 bytes (10 + 20 + 12 sign/decimal)
+01 WS-GOODS-PRICES.
+    05 WS-GP-PORT OCCURS 5.
+        10 WS-GP-PORT-ID     PIC 9(10).
+        10 WS-GP-GOOD OCCURS 5.
+            15 WS-GP-GOOD-ID PIC 9(10).
+            15 WS-GP-PRICE   PIC 9(10)V99.
+```
 
----
-
-## ACCOUNTS-COUNTER.DAT
-
-Sequential file. Stores single record tracking last assigned ID.
-
-### ACCOUNT-COUNTER-RECORD
-
-| Field | PIC | Size | Description |
-|-------|-----|------|-------------|
-| `LAST-ACCOUNT-ID` | `9(10)` | 10 digits | Last assigned account ID |
-
-**Behavior**: read on startup, incremented by 1, rewritten after each account creation.
+**Price algorithm**:
+1. Initial price for each (port, good) = BASE-PRICE × (1 ± random(0.5)) — large ±50 % spread
+2. Fluctuation at each departure = CURRENT-PRICE × (1 ± random(0.1)) — small ±10 % change
 
 ---
 
----
+## GAME-DATA copybook (LINKAGE structure)
 
-## TRANSACTIONS.DAT
+Shared between main and subprograms via `LINKAGE SECTION`.
 
-Indexed file. Organization: `INDEXED`. Access mode: `DYNAMIC`. Record key: `TRANSACTION-ID`.
-
-### TRANSACTION-RECORD
-
-| Field | PIC | Size | Description |
-|-------|-----|------|-------------|
-| `TRANSACTION-ID` | `9(10)` | 10 digits | Sequential primary key, auto-incremented |
-| `SOURCE-ID` | `9(10)` | 10 digits | Source account ID |
-| `DESTINATION-ID` | `9(10)` | 10 digits | Destination account ID |
-| `TRANSACTION-AMOUNT` | `S9(10)V99` | Signed, 10 int + 2 dec | Transferred amount |
-| `TRANSACTION-TIMESTAMP` | `X(21)` | 21 chars | Date-time from `FUNCTION CURRENT-DATE` |
-
-**Total record size**: ~53 bytes
-
----
-
-## TRANSACTIONS-COUNTER.DAT
-
-Sequential file. Stores single record tracking last assigned transaction ID.
-
-### TRANSACTION-COUNTER-RECORD
-
-| Field | PIC | Size | Description |
-|-------|-----|------|-------------|
-| `LAST-TRANSACTION-ID` | `9(10)` | 10 digits | Last assigned transaction ID |
-
-**Behavior**: read on startup, incremented by 1, rewritten after each logged transaction.
+| Field | PIC | Purpose |
+|-------|-----|---------|
+| `WS-MONEY` | `S9(10)V99` | Current treasury |
+| `WS-CURRENT-PORT` | `9(10)` | Current port ID |
+| `WS-VISITED-COUNT` | `9(10)` | Ports visited count |
+| `WS-STATUS` | `X(10)` | Game status |
 
 ---
 
 ## Working-Storage Variables
 
-### account-creation.cbl
+### game.cbl
 
 | Variable | PIC | Purpose |
 |----------|-----|---------|
-| `WS-ACCOUNT-ID` | `X(10)` | Temp buffer for new ID |
-| `WS-ACCOUNT-NAME` | `X(20)` | User input buffer for name |
-| `WS-ACCOUNT-BALANCE` | `S9(10)V99` | Init to 0 |
-| `WS-ACCOUNTS-STATUS` | `XX` | File status for ACCOUNTS.DAT |
-| `WS-COUNTER-STATUS` | `XX` | File status for COUNTER.DAT |
+| `WS-ACTION` | `9(01)` | 0=quit, 1=navigate, 2=buy, 3=sell, 4=refuel |
+| `WS-ARG` | `9(10)` | Value (e.g. port ID; good ID...) |
+| `WS-FUEL-COST` | `9(10)V99` | Constant 30 |
+| `WS-CURRENT-PORT` | `9(10)` | Current port ID |
+| `WS-DESTINATION-PORT` | `9(10)` | Destination port ID |
+| `WS-RESULT` | `X(10)` | Win/lose result |
+| `WS-PORT-TABLE` | — | Table of 5 port entries |
+| `WS-GOODS-LIST` | — | Table of 5 goods (ID + name + base price) |
+| `WS-GOODS-PRICES` | — | Prices grid (5 ports × 5 goods) |
 
-### account-deletion.cbl
+### WS-PORT-TABLE structure
 
-| Variable | PIC | Purpose |
-|----------|-----|---------|
-| `WS-ACCOUNT-TO-DELETE-ID` | `9(10)` | User input: ID to delete |
-| `WS-ACCOUNTS-STATUS` | `XX` | File status |
+| Level | Field | PIC | OCCURS |
+|-------|-------|-----|--------|
+| 10 | `WS-PORT-ID` | `9(10)` | 5 |
+| 10 | `WS-PORT-NAME` | `X(20)` | — |
+| 10 | `WS-PORT-DESC` | `X(60)` | — |
+| 10 | `WS-PORT-VISITED` | `X(01)` | — |
 
-### account-list.cbl
-
-| Variable | PIC | Purpose |
-|----------|-----|---------|
-| WS-ACCOUNTS-STATUS | XX | File status |
-| WS-END-OF-FILE-FLAG | 9 | EOF flag (88-level: 0=not EOF, 1=EOF) |
-
-### transfer-money.cbl
-
-| Variable | PIC | Purpose |
-|----------|-----|---------|
-| `WS-SOURCE-ID` | `9(10)` | Source account ID |
-| `WS-DESTINATION-ID` | `9(10)` | Destination account ID |
-| `WS-AMOUNT` | `9(10)V99` | Amount to transfer |
-| `WS-SOURCE-BALANCE` | `S9(10)V99` | Cached source balance |
-| `WS-DESTINATION-BALANCE` | `S9(10)V99` | Cached destination balance |
-| `WS-ACCOUNTS-STATUS` | `XX` | File status |
-| `WS-TRANSACTIONS-STATUS` | `XX` | Transaction file status |
-| `WS-TRANSACTIONS-COUNTER-STATUS` | `XX` | Transaction counter status |
-
-### history-list.cbl
+### initialisation.cbl
 
 | Variable | PIC | Purpose |
 |----------|-----|---------|
-| `WS-TRANSACTIONS-STATUS` | `XX` | File status |
-| `WS-END-OF-FILE-FLAG` | `9` | EOF flag (88-level: 0=not EOF, 1=EOF) |
+| *(no WS — pure linkage)* | | |
 
+### port-screen.cbl
+
+| Variable | PIC | Purpose |
+|----------|-----|---------|
+| `WS-PORT-TABLE` | *(same as main)* | Local copy for display |
+| `WS-VALID-CHOICE` | `X(01)` | Input validation flag |
+| `WS-GOODS-LIST` | *(same as main)* | Local copy for goods display |
+| `WS-GOODS-PRICES` | *(same as main)* | Local copy for price display |
+
+### end-screen.cbl
+
+| Variable | PIC | Purpose |
+|----------|-----|---------|
+| *(none — pure display)* | | |
+
+---
+**Legacy** — Archived banking data structures at [LegacyDataStructure.md](legacy/LegacyDataStructure.md).

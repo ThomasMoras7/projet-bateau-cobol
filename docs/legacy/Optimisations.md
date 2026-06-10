@@ -25,3 +25,6 @@ Single entry-point program using `CALL` to invoke creation/deletion/list sub-pro
 
 ### 6 — ID Gaps
 Counter only increments, never decrements. Deleting account #3 then creating new one gives #4, not #3. Acceptable for prototype, problematic at scale.
+
+---
+**Legacy** — This is an archived banking doc. See [LegacyIndex.md](LegacyIndex.md) for the full legacy index.

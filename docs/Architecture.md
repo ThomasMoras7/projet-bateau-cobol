@@ -4,54 +4,89 @@
 
 ```
 Projet Bateau/
-├── README.md                  # Install guide, quick start
-├── setup_env.ps1              # Env initializer (PATH, COB_* vars)
+├── README.md                  # Game description, quick start
+├── setup_env.ps1              # Env initializer (PATH, COB_* vars) — shared
+├── build-game.ps1              # Build script for game
 ├── .gitignore                 # Excludes exe, obj, gnu-cobol/, .vscode/
 ├── LICENSE
 │
 ├── gnu-cobol/                 # Portable GnuCOBOL 3.2.0 (gitignored)
-│   ├── bin/                   #   Compiler binaries (cobc, cobcrun…)
-│   ├── lib/                   #   Runtime libraries
-│   ├── include/               #   C headers for COBOL runtime
-│   ├── config/                #   Compiler config files
-│   ├── copy/                  #   Copybook directory
-│   ├── extras/                #   Extra library modules
-│   ├── locale/                #   Localization files
-│   └── share/zoneinfo/        #   Timezone data (optional)
 │
 ├── src/                       # COBOL source files
-│   ├── account-creation.cbl   #   Create new account
-│   ├── account-deletion.cbl   #   Delete account by ID
-│   ├── account-list.cbl       #   List all accounts
-│   ├── history-list.cbl       #   View transaction journal
-│   ├── search-account-balance.cbl # Search balance by ID
-│   └── transfer-money.cbl     #   Transfer between accounts
+│   ├── [game]
+│   │   ├── game.cbl               #   Main program — game loop
+│   │   ├── initialisation.cbl     #   Initialize game state + prices
+│   │   ├── port-screen.cbl        #   Port screen: display, market, navigation
+│   │   ├── end-screen.cbl         #   Win/lose end screen
+│   │   ├── copybooks/
+│   │   │   ├── port-rec           #   Port record
+│   │   │   ├── game-rec           #   Game save record (RUN 2+)
+│   │   │   ├── game-data          #   Game state shared between modules
+│   │   │   ├── goods-data         #   In-memory goods table
+│   │   │   ├── acc-rec            #   Legacy (banking)
+│   │   │   └── tran-rec           #   Legacy (banking)
+│   │
+│   └── [legacy] — superseded, git history preserves it
+│       ├── account-creation.cbl
+│       ├── account-deletion.cbl
+│       ├── account-list.cbl
+│       ├── history-list.cbl
+│       ├── search-account-balance.cbl
+│       ├── transfer-money.cbl
+│       └── build.ps1
 │
-├── bin/                       # Build output + data files
-│   ├── account-creation.exe   #   (gitignored)
-│   ├── account-deletion.exe   #   (gitignored)
-│   ├── account-list.exe       #   (gitignored)
-│   ├── history-list.exe       #   (gitignored)
-│   ├── search-account-balance.exe # (gitignored)
-│   ├── transfer-money.exe     #   (gitignored)
-│   ├── ACCOUNTS.DAT           #   Indexed account records
-│   ├── ACCOUNTS-COUNTER.DAT   #   Sequential account ID counter
-│   ├── TRANSACTIONS.DAT       #   Indexed transaction journal
-│   └── TRANSACTIONS-COUNTER.DAT # Sequential transaction ID counter
+├── bin/                       # Build output
+│   ├── boat-game.exe          #   (gitignored)
+│   ├── PORTS.DAT              #   Indexed port records (RUN 2+)
+│   └── GAME.DAT               #   Sequential game save (RUN 2+)
 │
 └── docs/                      # Project wiki
     ├── Index.md
+    ├── GameDesign.md
     ├── Features.md
     ├── Architecture.md
     ├── DataStructure.md
     ├── API.md
-    ├── Optimisations.md
+    ├── API-Run1.md
+    ├── API-Run2.md
+    ├── API-Run3.md
+    ├── API-Run4.md
     └── Changelog.md
 ```
 
 ## Design Principles
 
-- **One program per operation** — each `.cbl` file standalone executable, no shared runtime
-- **Flat structure** — no nested modules, copybooks, or subprograms
-- **File-based persistence** — indexed `ACCOUNTS.DAT` for keyed access, `TRANSACTIONS.DAT` for transaction journal, sequential counter files for ID generation
-- **Portable toolchain** — `gnu-cobol/` directory self-contained, `setup_env.ps1` dynamically resolves paths
+- **Main + subprograms** (provisional) : currently split into modules for clarity.
+- **Single executable** : all modules compiled together via `cobc -x main.cbl mod1.cbl ...` into one `.exe`
+- **No `.DAT` files in RUN 1** : state is purely in-memory. Persistence is planned for RUN 2+.
+
+## Data Flow (RUN 1)
+
+```
+game (main)
+  ├── CALL initialisation(game-data, goods-prices)  → set initial state + random prices
+  ├── Build port table from hardcoded data
+  ├── LOOP:
+  │     CALL port-screen(action, arg, game-data, port-table, goods-prices)
+  │        → user can buy/sell goods, pick destination
+  │     IF money < 30 → CALL end-screen("LOST")
+  │     Deduct 30 fuel cost
+  │     DISPLAY travel narrative
+  │     Fluctuate goods prices (random ±10 %)
+  │     Mark destination port as visited
+  │     IF all visited → CALL end-screen("WON")
+  └── STOP RUN
+```
+
+## Module Interfaces (RUN 1)
+
+| Subprogram | Parameters (USING) | Description |
+|------------|-------------------|-------------|
+| `INITIALISATION` | `GAME-DATA`, `GOODS-PRICES` | Sets initial money, port, visited + generates prices |
+| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES` | Display port + goods + destinations ; buy/sell ; pick destination |
+| `END-SCREEN` | `RESULT` | Win/lose screen |
+
+Travel narrative is inline in the main loop (no separate module needed).
+
+---
+**Legacy** — Archived banking architecture at [LegacyArchitecture.md](legacy/LegacyArchitecture.md).

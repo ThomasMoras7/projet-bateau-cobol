@@ -1,50 +1,30 @@
-# Projet Bateau — COBOL Account Manager
+# Projet Bateau
 
-Portable COBOL development environment with **GnuCOBOL 3.2.0** on Windows.
-Three CLI programs manage bank accounts via indexed file I/O.
+A turn-based maritime shipping game in **COBOL** (GnuCOBOL 3.2.0). Buy low, sell high, don't run out of fuel.
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Initialize Environment
 ```powershell
-./setup_env.ps1
+.\build-game.ps1
+cd bin
+.\boat-game.exe
 ```
 
-### 2. Compile All Programs
-```powershell
-cobc -x src/account-creation.cbl -o bin/account-creation.exe
-cobc -x src/account-deletion.cbl -o bin/account-deletion.exe
-cobc -x src/account-list.cbl -o bin/account-list.exe
-```
+## RUN 1 — Navigation Prologue
 
-### 3. Run
-```powershell
-./bin/account-creation.exe
-./bin/account-list.exe
-./bin/account-deletion.exe
-```
+- Visit 5 ports across the world
+- Trade 5 types of goods with dynamic pricing
+- Lose if you can't afford fuel for the next journey
 
-## 📁 Project Structure
+## Roadmap
 
-| Path | Description |
-|------|-------------|
-| `gnu-cobol/` | Portable compiler binaries, libs, includes |
-| `setup_env.ps1` | PowerShell env initializer (PATH, COB vars) |
-| `src/` | COBOL source files |
-| `bin/` | Compiled executables + data files |
-| `docs/` | Project wiki |
+| RUN | Theme | Status |
+|-----|-------|--------|
+| 1 | Navigation | In progress |
+| 2 | Commerce + saves | Up next |
+| 3 | Fleet + shipyard | Planned |
+| 4 | Full integration | Planned |
 
-## 🛠 Recommended VS Code Extensions
-
-1. **[COBOL](https://marketplace.visualstudio.com/items?itemName=bitlang.cobol)** (bitlang) — Syntax highlighting, snippets
-2. **[COBOL Language Support](https://marketplace.visualstudio.com/items?itemName=broadcom.cobol-language-support)** (Broadcom) — Go-to-definition, linting
-
-## 📝 Notes
-
-- `setup_env.ps1` auto-detects its own location → fully portable
-- Data files (`ACCOUNTS.DAT`, `ACCOUNTS-COUNTER.DAT`) auto-created on first run
-- **`setup_env.ps1` overwrites `.vscode/settings.json`** on every run (VS Code config is generated, not hand-edited)
-
-## 📖 Documentation
+## Docs
 
 Full wiki → [docs/Index.md](docs/Index.md)
