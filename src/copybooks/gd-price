@@ -1,0 +1,6 @@
+       01 WS-GOODS-PRICES-LIST.
+           05 WS-GOODS-PRICES OCCURS 5.
+               10 WS-GOODS-PRICES-PORT-ID     PIC 9(10).
+               10 WS-GOODS-PRICES-GOOD OCCURS 5.
+                   15 WS-GOODS-PRICES-GOOD-ID PIC 9(10).
+                   15 WS-GOODS-PRICES-PRICE   PIC 9(10)V99.

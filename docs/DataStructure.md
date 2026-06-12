@@ -1,10 +1,10 @@
 # Data Structure
 
-## GOODS-PRICES (in-memory table)
+## Goods tables (in-memory)
 
-Price table for the 5 goods across all 5 ports, randomly generated at game start. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
+Goods list (base prices) and price grid across ports. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
 
-Proposed COBOL structure:
+### WS-GOODS-LIST — copybook `goods-data`
 
 ```
 01 WS-GOODS-LIST.
@@ -12,7 +12,11 @@ Proposed COBOL structure:
         10 WS-GOOD-ID        PIC 9(10).
         10 WS-GOOD-NAME      PIC X(20).
         10 WS-GOOD-BASE-PRICE PIC 9(10)V99.
+```
 
+### WS-GOODS-PRICES-LIST — copybook `gd-price`
+
+```
 01 WS-GOODS-PRICES-LIST.
     05 WS-GOODS-PRICES OCCURS 5.
         10 WS-GOODS-PRICES-PORT-ID     PIC 9(10).
