@@ -82,8 +82,8 @@ game (main)
 
 | Subprogram | Parameters (USING) | Description |
 |------------|-------------------|-------------|
-| `INITIALISATION` | `GAME-DATA`, `GOODS-PRICES` | Sets initial money, port, visited + generates prices |
-| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES` | Display port + goods + destinations ; buy/sell ; pick destination |
+| `INITIALISATION` | `GAME-DATA`, `GOODS-PRICES-LIST` | Sets initial money, port, visited + generates prices |
+| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES-LIST` | Display port + goods + destinations ; buy/sell ; pick destination |
 | `END-SCREEN` | `RESULT` | Win/lose screen |
 
 Travel narrative is inline in the main loop (no separate module needed).

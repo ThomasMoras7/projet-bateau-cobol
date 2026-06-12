@@ -13,12 +13,12 @@ Proposed COBOL structure:
         10 WS-GOOD-NAME      PIC X(20).
         10 WS-GOOD-BASE-PRICE PIC 9(10)V99.
 
-01 WS-GOODS-PRICES.
-    05 WS-GP-PORT OCCURS 5.
-        10 WS-GP-PORT-ID     PIC 9(10).
-        10 WS-GP-GOOD OCCURS 5.
-            15 WS-GP-GOOD-ID PIC 9(10).
-            15 WS-GP-PRICE   PIC 9(10)V99.
+01 WS-GOODS-PRICES-LIST.
+    05 WS-GOODS-PRICES OCCURS 5.
+        10 WS-GOODS-PRICES-PORT-ID     PIC 9(10).
+        10 WS-GOODS-PRICES-GOOD OCCURS 5.
+            15 WS-GOODS-PRICES-GOOD-ID PIC 9(10).
+            15 WS-GOODS-PRICES-PRICE   PIC 9(10)V99.
 ```
 
 **Price algorithm**:
@@ -35,7 +35,7 @@ Shared between main and subprograms via `LINKAGE SECTION`.
 |-------|-----|---------|
 | `WS-MONEY` | `S9(10)V99` | Current treasury |
 | `WS-CURRENT-PORT` | `9(10)` | Current port ID |
-| `WS-VISITED-COUNT` | `9(10)` | Ports visited count |
+| `WS-VISITED-PORTS-COUNT` | `9(10)` | Ports visited count |
 | `WS-STATUS` | `X(10)` | Game status |
 
 ---

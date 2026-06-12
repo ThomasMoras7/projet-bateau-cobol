@@ -8,18 +8,18 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 
 ### Issue 1.1 — Project setup + copybooks + build script
 
-- [ ] Create `src/copybooks/port-rec` (PORT-RECORD: PORT-ID, PORT-NAME, PORT-DESCRIPTION, PORT-VISITED)
-- [ ] Create `src/copybooks/game-rec` (GAME-RECORD for future save file)
-- [ ] Create `src/copybooks/game-data` (WS-GAME-DATA for LINKAGE)
-- [ ] Create `src/copybooks/goods-data` (WS-GOODS-LIST + WS-GOODS-PRICES for in-memory goods table)
-- [ ] Create `build-game.ps1` (compiles game.cbl + subprograms into single exe)
-- [ ] Update `AGENTS.md` with game workflow
-- [ ] Update `README.md` with game description
+- [x] Create `src/copybooks/port-rec` (PORT-RECORD: PORT-ID, PORT-NAME, PORT-DESCRIPTION, PORT-VISITED)
+- [x] Create `src/copybooks/game-rec` (GAME-RECORD for future save file)
+- [x] Create `src/copybooks/game-data` (WS-GAME-DATA for LINKAGE)
+- [x] Create `src/copybooks/goods-data` (WS-GOODS-LIST + WS-GOODS-PRICES-LIST for in-memory goods table)
+- [x] Create `build-game.ps1` (compiles game.cbl + subprograms into single exe)
+- [x] Update `AGENTS.md` with game workflow
+- [x] Update `README.md` with game description
 
 ### Issue 1.2 — initialisation module
 
 - [ ] Create `src/initialisation.cbl`
-- [ ] Receives `GAME-DATA` + `GOODS-PRICES` via LINKAGE
+- [ ] Receives `GAME-DATA` + `GOODS-PRICES-LIST` via LINKAGE
 - [ ] Sets money=500, current-port=1, visited=0, status="PLAYING"
 - [ ] Generates random goods prices for each port (5 goods × 5 ports): base price × (1 ± random(0.5))
 - [ ] `GOBACK` to return
@@ -29,7 +29,7 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 ### Issue 1.3 — port-screen module
 
 - [ ] Create `src/port.cbl`
-- [ ] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES`
+- [ ] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST`
 - [ ] Displays current port name + description + visited status
 - [ ] Shows current money and fuel cost (30) for next trip
 - [ ] Lists goods at current port with buy price
