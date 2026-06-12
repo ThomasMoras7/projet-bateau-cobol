@@ -1,0 +1,5 @@
+       01 PORT-RECORD.
+           05 PORT-ID           PIC 9(10).
+           05 PORT-NAME         PIC X(20).
+           05 PORT-DESCRIPTION  PIC X(60).
+           05 PORT-VISITED      PIC X(01).

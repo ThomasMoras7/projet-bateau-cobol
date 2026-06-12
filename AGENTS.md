@@ -15,7 +15,7 @@ cd bin; .\boat-game.exe  # Run
 - **Language**: COBOL (GnuCOBOL). No tests, no linter, no formatter.
 - **Copybooks** in `src/copybooks/`. Include via `-I src\copybooks`.
 - **All programs interactive** — DISPLAY/ACCEPT in French.
-- **Full variable names only** — never abbreviate (use `TIMESTAMP`, never `TS`).
+- **Full variable names only** — never abbreviate. No prefix shortcuts (`WS-GP-` is forbidden, write `WS-GOODS-PRICES-PRICE`). No single-word abbreviations (`TS` instead of `TIMESTAMP`). Every level of the name must be a full, readable word.
 - **Copybook names ≤ 8 characters** (GnuCOBOL fixed-format limit).
 - **`.gitignore`**: `*.exe`, `*.obj`, `gnu-cobol/**` excluded.
 - **Architecture**: Main program `game.cbl` + CALLed subprograms (`initialisation.cbl`, `port-screen.cbl`, `end-screen.cbl`), compiled together into one executable. **Open question**: subprograms may be merged into a single file depending on complexity.
