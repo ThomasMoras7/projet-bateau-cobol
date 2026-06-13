@@ -21,9 +21,9 @@ Projet Bateau/
 │   │   ├── copybooks/
 │   │   │   ├── port-rec           #   Port record
 │   │   │   ├── game-rec           #   Game save record (RUN 2+)
-│   │   │   ├── game-data          #   Game state shared between modules
-│   │   │   ├── goods-data         #   Goods list (5 goods with base prices)
-│   │   │   └── gd-price           #   Goods prices grid (5 ports × 5 goods)
+│   │   │   ├── game-dat          #   Game state shared between modules
+│   │   │   ├── gds-dat           #   Goods list (5 goods with base prices)
+│   │   │   └── pric-dat          #   Goods prices grid (5 ports × 5 goods)
 │   │   │   ├── acc-rec            #   Legacy (banking)
 │   │   │   └── tran-rec           #   Legacy (banking)
 │   │

@@ -4,7 +4,7 @@
 
 Goods list (base prices) and price grid across ports. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
 
-### WS-GOODS-LIST — copybook `goods-data`
+### WS-GOODS-LIST — copybook `gds-dat`
 
 ```
 01 WS-GOODS-LIST.
@@ -14,7 +14,7 @@ Goods list (base prices) and price grid across ports. Stored in WORKING-STORAGE 
         10 WS-GOOD-BASE-PRICE PIC 9(10)V99.
 ```
 
-### WS-GOODS-PRICES-LIST — copybook `gd-price`
+### WS-GOODS-PRICES-LIST — copybook `pric-dat`
 
 ```
 01 WS-GOODS-PRICES-LIST.

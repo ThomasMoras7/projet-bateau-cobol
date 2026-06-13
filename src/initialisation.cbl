@@ -1,26 +1,23 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. INITIALISATION.
-       AUTHOR. Thomas Moras.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       COPY goods-data.
+       COPY gds-dat.
        01 WS-I PIC 9(10).
        01 WS-J PIC 9(10).
 
        LINKAGE SECTION.
-       COPY game-data.
-       COPY gd-price.
+       COPY game-dat.
+       COPY pric-dat.
 
        PROCEDURE DIVISION USING WS-GAME-DATA WS-GOODS-PRICES-LIST.
 
-           *> Setup state
            MOVE 500 TO WS-MONEY
            MOVE 1 TO WS-CURRENT-PORT
            MOVE 0 TO WS-VISITED-PORTS-COUNT
            MOVE "PLAYING" TO WS-STATUS
 
-           *> Setup goods
            MOVE 1 TO WS-GOOD-ID(1)
            MOVE "Coffee" TO WS-GOOD-NAME(1)
            MOVE 50 TO WS-GOOD-BASE-PRICE(1)
@@ -37,7 +34,6 @@
            MOVE "Electronics" TO WS-GOOD-NAME(5)
            MOVE 120 TO WS-GOOD-BASE-PRICE(5)
 
-           *> Setup prices
            PERFORM VARYING WS-I FROM 1 BY 1 UNTIL WS-I > 5
                MOVE WS-I TO WS-GOODS-PRICES-PORT-ID(WS-I)
                PERFORM VARYING WS-J FROM 1 BY 1 UNTIL WS-J > 5

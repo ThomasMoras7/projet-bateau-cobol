@@ -10,9 +10,9 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 
 - [x] Create `src/copybooks/port-rec` (PORT-RECORD: PORT-ID, PORT-NAME, PORT-DESCRIPTION, PORT-VISITED)
 - [x] Create `src/copybooks/game-rec` (GAME-RECORD for future save file)
-- [x] Create `src/copybooks/game-data` (WS-GAME-DATA for LINKAGE)
-- [x] Create `src/copybooks/goods-data` (WS-GOODS-LIST — 5 goods with base prices)
-- [x] Create `src/copybooks/gd-price` (WS-GOODS-PRICES-LIST — 5×5 price grid)
+- [x] Create `src/copybooks/game-dat` (WS-GAME-DATA for LINKAGE)
+- [x] Create `src/copybooks/gds-dat` (WS-GOODS-LIST — 5 goods with base prices)
+- [x] Create `src/copybooks/pric-dat` (WS-GOODS-PRICES-LIST — 5×5 price grid)
 - [x] Create `build-game.ps1` (compiles game.cbl + subprograms into single exe)
 - [x] Update `AGENTS.md` with game workflow
 - [x] Update `README.md` with game description
