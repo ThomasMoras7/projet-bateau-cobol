@@ -1,10 +1,10 @@
 # Data Structure
 
-## GOODS-PRICES (in-memory table)
+## Goods tables (in-memory)
 
-Price table for the 5 goods across all 5 ports, randomly generated at game start. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
+Goods list (base prices) and price grid across ports. Stored in WORKING-STORAGE only (never persisted — prices are ephemeral).
 
-Proposed COBOL structure:
+### WS-GOODS-LIST — copybook `gds-dat`
 
 ```
 01 WS-GOODS-LIST.
@@ -12,7 +12,11 @@ Proposed COBOL structure:
         10 WS-GOOD-ID        PIC 9(10).
         10 WS-GOOD-NAME      PIC X(20).
         10 WS-GOOD-BASE-PRICE PIC 9(10)V99.
+```
 
+### WS-GOODS-PRICES-LIST — copybook `pric-dat`
+
+```
 01 WS-GOODS-PRICES-LIST.
     05 WS-GOODS-PRICES OCCURS 5.
         10 WS-GOODS-PRICES-PORT-ID     PIC 9(10).
@@ -56,13 +60,14 @@ Shared between main and subprograms via `LINKAGE SECTION`.
 | `WS-GOODS-LIST` | — | Table of 5 goods (ID + name + base price) |
 | `WS-GOODS-PRICES` | — | Prices grid (5 ports × 5 goods) |
 
-### WS-PORT-TABLE structure
+### WS-PORT-TABLE — copybook `port-dat`
 
 | Level | Field | PIC | OCCURS |
 |-------|-------|-----|--------|
-| 10 | `WS-PORT-ID` | `9(10)` | 5 |
+| 05 | `WS-PORT-ENTRY` | — | 5 |
+| 10 | `WS-PORT-ID` | `9(10)` | — |
 | 10 | `WS-PORT-NAME` | `X(20)` | — |
-| 10 | `WS-PORT-DESC` | `X(60)` | — |
+| 10 | `WS-PORT-DESCRIPTION` | `X(60)` | — |
 | 10 | `WS-PORT-VISITED` | `X(01)` | — |
 
 ### initialisation.cbl

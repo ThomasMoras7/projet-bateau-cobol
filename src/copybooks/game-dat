@@ -1,0 +1,5 @@
+       01 WS-GAME-DATA.
+           05 WS-MONEY          PIC S9(10)V99.
+           05 WS-CURRENT-PORT   PIC 9(10).
+           05 WS-VISITED-PORTS-COUNT    PIC 9(10).
+           05 WS-STATUS         PIC X(10).
