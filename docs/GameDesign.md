@@ -41,11 +41,11 @@ At each departure, all prices fluctuate slightly: current price × (1 ± random(
 
 | # | Name | Description |
 |---|------|-------------|
-| 1 | Shanghai (China) | The world's largest port. Non-stop traffic. |
-| 2 | Rotterdam (Netherlands) | Gateway to Europe. Mind the locks. |
-| 3 | Singapore | Ultra-modern Asian hub. Ultra-low taxes. |
-| 4 | New York (USA) | The Statue of Liberty watches over the harbor. |
-| 5 | Marseille (France) | France's top port. Pastis flows freely. |
+| 1 | Shanghai (China) | Le plus grand port du monde. Trafic non-stop. |
+| 2 | Rotterdam (Netherlands) | Porte d'entrée de l'Europe. Attention aux écluses. |
+| 3 | Singapore | Plateforme asiatique ultra-moderne. |
+| 4 | New York (USA) | La statue de la Liberté veille sur le port. |
+| 5 | Marseille (France) | Le premier port de France. Le pastis coule à flots. |
 
 ## Fuel
 

@@ -60,13 +60,14 @@ Shared between main and subprograms via `LINKAGE SECTION`.
 | `WS-GOODS-LIST` | — | Table of 5 goods (ID + name + base price) |
 | `WS-GOODS-PRICES` | — | Prices grid (5 ports × 5 goods) |
 
-### WS-PORT-TABLE structure
+### WS-PORT-TABLE — copybook `port-dat`
 
 | Level | Field | PIC | OCCURS |
 |-------|-------|-----|--------|
-| 10 | `WS-PORT-ID` | `9(10)` | 5 |
+| 05 | `WS-PORT-ENTRY` | — | 5 |
+| 10 | `WS-PORT-ID` | `9(10)` | — |
 | 10 | `WS-PORT-NAME` | `X(20)` | — |
-| 10 | `WS-PORT-DESC` | `X(60)` | — |
+| 10 | `WS-PORT-DESCRIPTION` | `X(60)` | — |
 | 10 | `WS-PORT-VISITED` | `X(01)` | — |
 
 ### initialisation.cbl

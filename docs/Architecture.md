@@ -19,7 +19,7 @@ Projet Bateau/
 │   │   ├── port-screen.cbl        #   Port screen: display, market, navigation
 │   │   ├── end-screen.cbl         #   Win/lose end screen
 │   │   ├── copybooks/
-│   │   │   ├── port-rec           #   Port record
+│   │   │   ├── port-dat           #   Port table in WORKING-STORAGE
 │   │   │   ├── game-rec           #   Game save record (RUN 2+)
 │   │   │   ├── game-dat          #   Game state shared between modules
 │   │   │   ├── gds-dat           #   Goods list (5 goods with base prices)
