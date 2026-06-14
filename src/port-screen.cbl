@@ -5,6 +5,7 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01 WS-GOODS-INDEX PIC 9(10).
+       01 WS-PORT-INDEX PIC 9(10).
 
        LINKAGE SECTION.
        01 WS-ACTION PIC 9(01).
@@ -35,7 +36,7 @@
                WHEN 0
                    DISPLAY "Placeholder: quitter"
                WHEN 1
-                   DISPLAY "Placeholder: naviguer"
+                   PERFORM DISPLAY-PORTS-LIST
                WHEN 2
                    DISPLAY "Placeholder: acheter"
                    PERFORM DISPLAY-GOODS-TABLE
@@ -49,6 +50,24 @@
            END-EVALUATE
 
            GOBACK.
+
+       DISPLAY-PORTS-LIST.
+           DISPLAY " "
+           DISPLAY "--- Ports disponibles ---"
+           PERFORM VARYING WS-PORT-INDEX FROM 1 BY 1
+                   UNTIL WS-PORT-INDEX > 5
+               IF WS-PORT-INDEX NOT = WS-CURRENT-PORT
+                   DISPLAY WS-PORT-NAME(WS-PORT-INDEX) WITH NO ADVANCING
+                   IF WS-PORT-VISITED(WS-PORT-INDEX) = 1
+                       DISPLAY "   Deja visite"
+                   ELSE
+                       DISPLAY "   Nouveau port"
+                   END-IF
+               END-IF
+           END-PERFORM
+           DISPLAY " "
+           DISPLAY "Choisissez une destination: " WITH NO ADVANCING
+           .
 
        DISPLAY-GOODS-TABLE.
            DISPLAY " "
