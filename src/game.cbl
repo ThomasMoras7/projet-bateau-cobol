@@ -1,0 +1,21 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. GAME.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-ACTION PIC 9(01).
+       01 WS-ARG PIC 9(10).
+       COPY game-dat.
+       COPY port-dat.
+       COPY gds-dat.
+       COPY pric-dat.
+
+       PROCEDURE DIVISION.
+
+           CALL "INITIALISATION" USING WS-GAME-DATA WS-PORT-TABLE
+               WS-GOODS-LIST WS-GOODS-PRICES-LIST
+
+           CALL "PORT-SCREEN" USING WS-ACTION WS-ARG WS-GAME-DATA
+               WS-PORT-TABLE WS-GOODS-LIST WS-GOODS-PRICES-LIST
+
+           STOP RUN.

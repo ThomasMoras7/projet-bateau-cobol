@@ -3,16 +3,17 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       COPY gds-dat.
-       COPY port-dat.
        01 WS-I PIC 9(10).
        01 WS-J PIC 9(10).
 
        LINKAGE SECTION.
        COPY game-dat.
+       COPY port-dat.
+       COPY gds-dat.
        COPY pric-dat.
 
-       PROCEDURE DIVISION USING WS-GAME-DATA WS-GOODS-PRICES-LIST.
+       PROCEDURE DIVISION USING WS-GAME-DATA WS-PORT-TABLE
+               WS-GOODS-LIST WS-GOODS-PRICES-LIST.
 
            MOVE 500 TO WS-MONEY
            MOVE 1 TO WS-CURRENT-PORT

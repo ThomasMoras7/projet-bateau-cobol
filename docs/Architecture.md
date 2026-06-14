@@ -65,10 +65,10 @@ Projet Bateau/
 
 ```
 game (main)
-  ├── CALL initialisation(game-data, goods-prices)  → set initial state + random prices
-  ├── Build port table from hardcoded data
+  ├── CALL initialisation(game-data, port-table, goods-list, goods-prices)
+  │      → sets money, port, visited, status; populates port table + goods + prices
   ├── LOOP:
-  │     CALL port-screen(action, arg, game-data, port-table, goods-prices)
+  │     CALL port-screen(action, arg, game-data, port-table, goods-list, goods-prices)
   │        → user can buy/sell goods, pick destination
   │     IF money < 30 → CALL end-screen("LOST")
   │     Deduct 30 fuel cost
@@ -83,7 +83,7 @@ game (main)
 
 | Subprogram | Parameters (USING) | Description |
 |------------|-------------------|-------------|
-| `INITIALISATION` | `GAME-DATA`, `GOODS-PRICES-LIST` | Sets initial money, port, visited + generates prices |
+| `INITIALISATION` | `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Sets initial state + generates prices + populates all data |
 | `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES-LIST` | Display port + goods + destinations ; buy/sell ; pick destination |
 | `END-SCREEN` | `RESULT` | Win/lose screen |
 

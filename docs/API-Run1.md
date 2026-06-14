@@ -20,7 +20,7 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 ### Issue 1.2 — initialisation module
 
 - [x] Create `src/initialisation.cbl`
-- [x] Receives `GAME-DATA` + `GOODS-PRICES-LIST` via LINKAGE
+- [x] Receives `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` via LINKAGE
 - [x] Sets money=500, current-port=1, visited=0, status="PLAYING"
 - [x] Generates random goods prices for each port (5 goods × 5 ports): base price × (1 ± random(0.5))
 - [x] `GOBACK` to return
@@ -29,10 +29,11 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 
 ### Issue 1.3 — port-screen module
 
-- [ ] Create `src/port.cbl`
-- [ ] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST`
-- [ ] Displays current port name + description + visited status
-- [ ] Shows current money and fuel cost (30) for next trip
+- [x] Create `src/port-screen.cbl`
+- [x] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST`
+- [x] Displays current port name + description
+- [x] Shows current money
+- [ ] Shows fuel cost (30) for next trip
 - [ ] Lists goods at current port with buy price
 - [ ] Lets user buy goods (select good + quantity, deduct money)
 - [ ] Lets user sell goods from cargo (if carrying any)
