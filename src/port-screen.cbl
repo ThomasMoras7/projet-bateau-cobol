@@ -21,5 +21,28 @@
            DISPLAY WS-PORT-DESCRIPTION(WS-CURRENT-PORT)
            DISPLAY "----------------------------------------"
            DISPLAY "Argent: " WS-MONEY "$"
+           DISPLAY " "
+           DISPLAY "1 - Voyager"
+           DISPLAY "2 - Acheter"
+           DISPLAY "3 - Vendre"
+           DISPLAY "4 - Remplir l'essence (50 000$)"
+           DISPLAY " "
+           DISPLAY "Votre choix: " WITH NO ADVANCING
+           ACCEPT WS-ACTION
+
+           EVALUATE WS-ACTION
+               WHEN 0
+                   DISPLAY "Placeholder: quitter"
+               WHEN 1
+                   DISPLAY "Placeholder: naviguer"
+               WHEN 2
+                   DISPLAY "Placeholder: acheter"
+               WHEN 3
+                   DISPLAY "Placeholder: vendre"
+               WHEN 4
+                   DISPLAY "Placeholder: remplir"
+               WHEN OTHER
+                   DISPLAY "Choix invalide."
+           END-EVALUATE
 
            GOBACK.
