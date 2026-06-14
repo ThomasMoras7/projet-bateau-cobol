@@ -33,6 +33,7 @@ Win: visit all 5 ports.
 - **Comment markers**: I (the human) write `*> Section name` headers. Agent never adds comments.
 - **CLOSE at end**: All CLOSE grouped unconditionally at program end.
 - **IF scoping**: No periods inside IF blocks — period only on final `END-IF.`
+- **English names**: All paragraph names, function names, and labels must be in English.
 - **Counter pattern** (for auto-increment, RUN 2+):
   1. `DISPLAY "Generation de l'ID..."`
   2. READ counter-file

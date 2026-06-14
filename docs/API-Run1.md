@@ -34,7 +34,7 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [x] Displays current port name + description
 - [x] Shows current money
 - [ ] Shows fuel cost (30) for next trip
-- [ ] Lists goods at current port with buy price
+- [x] Lists goods at current port with buy price
 - [ ] Lets user buy goods (select good + quantity, deduct money)
 - [ ] Lets user sell goods from cargo (if carrying any)
 - [ ] Lists other ports with their IDs
