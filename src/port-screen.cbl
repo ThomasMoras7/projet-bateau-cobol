@@ -18,6 +18,8 @@
        PROCEDURE DIVISION USING WS-ACTION WS-ARG WS-GAME-DATA
                WS-PORT-TABLE WS-GOODS-LIST WS-GOODS-PRICES-LIST.
 
+           CALL "SYSTEM" USING "cls"
+
            DISPLAY "=== PORT ==============================="
            DISPLAY "Port: " WS-PORT-NAME(WS-CURRENT-PORT)
            DISPLAY WS-PORT-DESCRIPTION(WS-CURRENT-PORT)
@@ -67,6 +69,7 @@
            END-PERFORM
            DISPLAY " "
            DISPLAY "Choisissez une destination: " WITH NO ADVANCING
+           ACCEPT WS-ARG
            .
 
        DISPLAY-GOODS-TABLE.

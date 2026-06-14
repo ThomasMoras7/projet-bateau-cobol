@@ -67,15 +67,13 @@ Projet Bateau/
 game (main)
   ├── CALL initialisation(game-data, port-table, goods-list, goods-prices)
   │      → sets money, port, visited, status; populates port table + goods + prices
-  ├── LOOP:
-  │     CALL port-screen(action, arg, game-data, port-table, goods-list, goods-prices)
-  │        → user can buy/sell goods, pick destination
-  │     IF money < 30 → CALL end-screen("LOST")
-  │     Deduct 30 fuel cost
-  │     DISPLAY travel narrative
-  │     Fluctuate goods prices (random ±10 %)
-  │     Mark destination port as visited
-  │     IF all visited → CALL end-screen("WON")
+  ├── LOOP (until status != "PLAYING"):
+  │     ├── CALL port-screen(action, arg, game-data, port-table, goods-list, goods-prices)
+  │     │      → user selects action; for navigation, also reads destination
+  │     ├── IF action = 0 → status = "QUIT"
+  │     └── (loop back)
+  ├── CALL end-screen(game-data)
+  │      → displays win/lose/quit message based on status
   └── STOP RUN
 ```
 
@@ -85,7 +83,7 @@ game (main)
 |------------|-------------------|-------------|
 | `INITIALISATION` | `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Sets initial state + generates prices + populates all data |
 | `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES-LIST` | Display port + goods + destinations ; buy/sell ; pick destination |
-| `END-SCREEN` | `RESULT` | Win/lose screen |
+| `END-SCREEN` | `GAME-DATA` | Win/lose/quit screen based on WS-STATUS |
 
 Travel narrative is inline in the main loop (no separate module needed).
 
