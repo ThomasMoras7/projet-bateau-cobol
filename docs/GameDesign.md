@@ -25,13 +25,15 @@ Lose: cannot afford fuel to reach any other port.
 
 Five types of cargo, each with a base price. Prices vary per port.
 
-| # | Good | Base Price |
+Starting capital: **120 000 €**. Goods are priced per ton.
+
+| # | Good | Base Price (€/ton) |
 |---|------|-----------|
-| 1 | Coffee | 50 |
-| 2 | Cotton | 40 |
-| 3 | Spices | 80 |
-| 4 | Wine | 60 |
-| 5 | Electronics | 120 |
+| 1 | Coffee | 3 000 |
+| 2 | Cotton | 2 000 |
+| 3 | Spices | 5 500 |
+| 4 | Wine | 4 000 |
+| 5 | Electronics | 9 000 |
 
 **Price generation** : at game start, each port gets a random buy price for each good:
 initial price = base price × (1 ± random(0.5)) — large ±50 % variation.
@@ -49,7 +51,7 @@ At each departure, all prices fluctuate slightly: current price × (1 ± random(
 
 ## Fuel
 
-Each journey costs **30** in fuel. If the player cannot afford fuel when trying to depart, the game is lost.
+Each journey costs **50 000 €** in fuel. If the player cannot afford fuel when trying to depart, the game is lost.
 
 ## Future RUNs (draft)
 

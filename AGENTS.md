@@ -25,7 +25,7 @@ cd bin; .\boat-game.exe  # Run
 
 ## Lose condition (RUN 1)
 
-Player loses when `money < fuel_cost` (30) at the moment of trying to depart.
+Player loses when `money < fuel_cost` (50000) at the moment of trying to depart.
 Win: visit all 5 ports.
 
 ## COBOL coding style

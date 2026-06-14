@@ -15,26 +15,26 @@
        PROCEDURE DIVISION USING WS-GAME-DATA WS-PORT-TABLE
                WS-GOODS-LIST WS-GOODS-PRICES-LIST.
 
-           MOVE 500 TO WS-MONEY
+           MOVE 120000 TO WS-MONEY
            MOVE 1 TO WS-CURRENT-PORT
            MOVE 0 TO WS-VISITED-PORTS-COUNT
            MOVE "PLAYING" TO WS-STATUS
 
            MOVE 1 TO WS-GOOD-ID(1)
            MOVE "Cafe" TO WS-GOOD-NAME(1)
-           MOVE 50 TO WS-GOOD-BASE-PRICE(1)
+           MOVE 3000 TO WS-GOOD-BASE-PRICE(1)
            MOVE 2 TO WS-GOOD-ID(2)
            MOVE "Coton" TO WS-GOOD-NAME(2)
-           MOVE 40 TO WS-GOOD-BASE-PRICE(2)
+           MOVE 2000 TO WS-GOOD-BASE-PRICE(2)
            MOVE 3 TO WS-GOOD-ID(3)
            MOVE "Epices" TO WS-GOOD-NAME(3)
-           MOVE 80 TO WS-GOOD-BASE-PRICE(3)
+           MOVE 5500 TO WS-GOOD-BASE-PRICE(3)
            MOVE 4 TO WS-GOOD-ID(4)
            MOVE "Vin" TO WS-GOOD-NAME(4)
-           MOVE 60 TO WS-GOOD-BASE-PRICE(4)
+           MOVE 4000 TO WS-GOOD-BASE-PRICE(4)
            MOVE 5 TO WS-GOOD-ID(5)
            MOVE "Electronique" TO WS-GOOD-NAME(5)
-           MOVE 120 TO WS-GOOD-BASE-PRICE(5)
+           MOVE 9000 TO WS-GOOD-BASE-PRICE(5)
 
            MOVE 1 TO WS-PORT-ID(1)
            MOVE "Shanghai (Chine)" TO WS-PORT-NAME(1)

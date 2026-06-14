@@ -22,12 +22,12 @@
            DISPLAY "Port: " WS-PORT-NAME(WS-CURRENT-PORT)
            DISPLAY WS-PORT-DESCRIPTION(WS-CURRENT-PORT)
            DISPLAY "----------------------------------------"
-           DISPLAY "Argent: " WS-MONEY "$"
+           DISPLAY "Argent: " WS-MONEY "€"
            DISPLAY " "
            DISPLAY "1 - Naviguer"
            DISPLAY "2 - Acheter"
            DISPLAY "3 - Vendre"
-           DISPLAY "4 - Remplir l'essence (50 000$)"
+           DISPLAY "4 - Remplir l'essence (50 000€)"
            DISPLAY " "
            DISPLAY "Votre choix: " WITH NO ADVANCING
            ACCEPT WS-ACTION
@@ -78,8 +78,8 @@
                    UNTIL WS-GOODS-INDEX > 5
                DISPLAY WS-GOOD-ID(WS-GOODS-INDEX) "  "
                    WS-GOOD-NAME(WS-GOODS-INDEX) "  "
-                   WS-GOODS-PRICES-PRICE(
-                       WS-CURRENT-PORT WS-GOODS-INDEX) "$"
+                    WS-GOODS-PRICES-PRICE(
+                        WS-CURRENT-PORT WS-GOODS-INDEX) "€"
            END-PERFORM
            DISPLAY "-------------------------------"
            .
