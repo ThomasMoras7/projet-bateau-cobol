@@ -51,7 +51,9 @@ At each departure, all prices fluctuate slightly: current price × (1 ± random(
 
 ## Fuel
 
-Each journey costs **50 000 $** in fuel. If the player cannot afford fuel when trying to depart, the game is lost.
+The ship has a fuel tank (flag: empty/full). Refueling costs **50 000 $**. Navigation is only possible when the tank is full. After each journey the tank empties.
+
+Starting fuel: empty.
 
 ## Future RUNs (draft)
 

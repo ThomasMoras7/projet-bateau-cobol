@@ -23,39 +23,72 @@
            DISPLAY "=== PORT ==============================="
            DISPLAY "Port: " WS-PORT-NAME(WS-CURRENT-PORT)
            DISPLAY WS-PORT-DESCRIPTION(WS-CURRENT-PORT)
-           DISPLAY "----------------------------------------"
+           DISPLAY "========================================"
            DISPLAY "Argent: " WS-MONEY "$"
-           DISPLAY " "
+           DISPLAY "Carburant: " WITH NO ADVANCING
+           IF WS-FUEL-FLAG = 1
+               DISPLAY "Plein"
+           ELSE
+               DISPLAY "Vide"
+           END-IF
            DISPLAY "1 - Naviguer"
            DISPLAY "2 - Acheter"
            DISPLAY "3 - Vendre"
            DISPLAY "4 - Remplir l'essence (50 000$)"
            DISPLAY " "
+           IF WS-NOTIFICATION NOT = SPACES
+               DISPLAY "----------------------------------------"
+               DISPLAY WS-NOTIFICATION
+               MOVE SPACES TO WS-NOTIFICATION
+           END-IF
+           DISPLAY "----------------------------------------"
            DISPLAY "Votre choix: " WITH NO ADVANCING
            ACCEPT WS-ACTION
 
            EVALUATE WS-ACTION
                WHEN 0
-                   DISPLAY "Placeholder: quitter"
+                   MOVE "Placeholder: quitter"
+                       TO WS-NOTIFICATION
                WHEN 1
-                   PERFORM DISPLAY-PORTS-LIST
+                   IF WS-FUEL-FLAG = 1
+                       PERFORM DISPLAY-PORTS-LIST
+                   ELSE
+                       MOVE "Faites le plein d'abord !"
+                           TO WS-NOTIFICATION
+                   END-IF
                WHEN 2
-                   DISPLAY "Placeholder: acheter"
+                   MOVE "Placeholder: acheter"
+                       TO WS-NOTIFICATION
                    PERFORM DISPLAY-GOODS-TABLE
                WHEN 3
-                   DISPLAY "Placeholder: vendre"
+                   MOVE "Placeholder: vendre"
+                       TO WS-NOTIFICATION
                    PERFORM DISPLAY-GOODS-TABLE
                WHEN 4
-                   DISPLAY "Placeholder: remplir"
+                   IF WS-FUEL-FLAG = 1
+                       MOVE "Plein deja fait !"
+                           TO WS-NOTIFICATION
+                   ELSE
+                       IF WS-MONEY >= 50000
+                           SUBTRACT 50000 FROM WS-MONEY
+                           MOVE 1 TO WS-FUEL-FLAG
+                           MOVE "Plein fait !"
+                               TO WS-NOTIFICATION
+                       ELSE
+                           MOVE "Pas assez d'argent !"
+                               TO WS-NOTIFICATION
+                       END-IF
+                   END-IF
                WHEN OTHER
-                   DISPLAY "Choix invalide."
+                   MOVE "Choix invalide."
+                       TO WS-NOTIFICATION
            END-EVALUATE
 
            GOBACK.
 
        DISPLAY-PORTS-LIST.
            DISPLAY " "
-           DISPLAY "--- Ports disponibles ---"
+           DISPLAY "=== Ports disponibles =================="
            PERFORM VARYING WS-PORT-INDEX FROM 1 BY 1
                    UNTIL WS-PORT-INDEX > 5
                IF WS-PORT-INDEX NOT = WS-CURRENT-PORT

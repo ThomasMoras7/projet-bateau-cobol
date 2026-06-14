@@ -3,3 +3,5 @@
            05 WS-CURRENT-PORT   PIC 9(10).
            05 WS-VISITED-PORTS-COUNT    PIC 9(10).
            05 WS-STATUS         PIC X(10).
+           05 WS-FUEL-FLAG      PIC 9(01).
+           05 WS-NOTIFICATION   PIC X(60).

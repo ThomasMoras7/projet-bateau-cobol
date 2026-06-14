@@ -19,6 +19,8 @@
            MOVE 1 TO WS-CURRENT-PORT
            MOVE 0 TO WS-VISITED-PORTS-COUNT
            MOVE "PLAYING" TO WS-STATUS
+           MOVE 0 TO WS-FUEL-FLAG
+           MOVE SPACES TO WS-NOTIFICATION
 
            MOVE 1 TO WS-GOOD-ID(1)
            MOVE "Cafe" TO WS-GOOD-NAME(1)
