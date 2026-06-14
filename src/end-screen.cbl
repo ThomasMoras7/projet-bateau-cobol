@@ -25,7 +25,7 @@
                    DISPLAY "  Partie quittee. A bientot !"
            END-EVALUATE
            DISPLAY " "
-           DISPLAY "  Argent final: " WS-MONEY "€"
+           DISPLAY "  Argent final: " WS-MONEY "$"
            DISPLAY "  Ports visites: " WS-VISITED-PORTS-COUNT
            DISPLAY " "
            DISPLAY "====================================="

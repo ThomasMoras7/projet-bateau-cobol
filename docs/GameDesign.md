@@ -25,9 +25,9 @@ Lose: cannot afford fuel to reach any other port.
 
 Five types of cargo, each with a base price. Prices vary per port.
 
-Starting capital: **120 000 €**. Goods are priced per ton.
+Starting capital: **120 000 $**. Goods are priced per ton.
 
-| # | Good | Base Price (€/ton) |
+| # | Good | Base Price ($/ton) |
 |---|------|-----------|
 | 1 | Coffee | 3 000 |
 | 2 | Cotton | 2 000 |
@@ -51,7 +51,7 @@ At each departure, all prices fluctuate slightly: current price × (1 ± random(
 
 ## Fuel
 
-Each journey costs **50 000 €** in fuel. If the player cannot afford fuel when trying to depart, the game is lost.
+Each journey costs **50 000 $** in fuel. If the player cannot afford fuel when trying to depart, the game is lost.
 
 ## Future RUNs (draft)
 
