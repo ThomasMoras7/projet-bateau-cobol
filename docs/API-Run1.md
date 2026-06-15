@@ -51,13 +51,13 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [x] Create `src/game.cbl`
 - [x] CALL initialisation with all 4 data params
 - [x] Game loop:
-  1. CALL port-screen → get action + destination
-  2. EVALUATE action: 0=quit, 1=navigate, other=continue
-  3. If navigate and money >= 50000: deduct fuel, move port, mark visited, check win
-  4. If navigate and money < 50000: set status to "LOST"
-  5. If all 5 ports visited: set status to "WON"
-- [ ] Price fluctuation on each departure (±10 %)
-- [ ] Travel narrative display
+1. CALL port-screen → get action + destination
+2. EVALUATE action: 0=quit, 1=navigate, other=continue
+3. If navigate and money >= 50000: deduct fuel, reset fuel flag, move port, mark visited, fluctuate prices, set arrival notification, check win
+4. If navigate and money < 50000: set status to "LOST"
+5. If all 5 ports visited: set status to "WON"
+- [x] Price fluctuation on each departure (±10 %)
+- [x] Travel narrative: arrival notification via STRING into WS-NOTIFICATION
 - [x] No file I/O, no save/load in RUN 1
 - [x] CALL end-screen after loop
 - [x] STOP RUN
@@ -81,6 +81,6 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [ ] Test NEW game: title → port → buy goods → navigate → sell goods → continue
 - [ ] Test WIN: visit all 5 ports → game over screen
 - [ ] Test LOSE: spend all money, try to navigate when money < 30 → "Not enough fuel!" → game over
-- [ ] Test invalid port input: should get "Invalid port, try again."
+- [x] Test invalid port input: should get "Destination invalide."
 
 **Dependencies**: 1.4, 1.5

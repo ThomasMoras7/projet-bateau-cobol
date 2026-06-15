@@ -6,6 +6,9 @@
        WORKING-STORAGE SECTION.
        01 WS-GOODS-INDEX PIC 9(10).
        01 WS-PORT-INDEX PIC 9(10).
+       01 WS-I PIC 9(10).
+       01 WS-J PIC 9(10).
+       01 WS-EXIT-FLAG PIC 9(01).
 
        LINKAGE SECTION.
        01 WS-ACTION PIC 9(01).
@@ -51,7 +54,7 @@
                        TO WS-NOTIFICATION
                WHEN 1
                    IF WS-FUEL-FLAG = 1
-                       PERFORM DISPLAY-PORTS-LIST
+                       PERFORM PROCESS-NAVIGATION
                    ELSE
                        MOVE "Faites le plein d'abord !"
                            TO WS-NOTIFICATION
@@ -86,13 +89,29 @@
 
            GOBACK.
 
+       PROCESS-NAVIGATION.
+           PERFORM DISPLAY-PORTS-LIST
+               MOVE 0 TO WS-FUEL-FLAG
+               MOVE WS-ARG TO WS-CURRENT-PORT
+               IF WS-PORT-VISITED(WS-CURRENT-PORT) = 0
+                   MOVE 1 TO WS-PORT-VISITED(WS-CURRENT-PORT)
+                   ADD 1 TO WS-VISITED-PORTS-COUNT
+               END-IF
+               PERFORM FLUCTUATE-PRICES
+                MOVE "Arrive a bon port !" TO WS-NOTIFICATION
+               IF WS-VISITED-PORTS-COUNT >= 5
+                   MOVE "WON" TO WS-STATUS
+           END-IF
+           .
+
        DISPLAY-PORTS-LIST.
            DISPLAY " "
            DISPLAY "=== Ports disponibles =================="
            PERFORM VARYING WS-PORT-INDEX FROM 1 BY 1
                    UNTIL WS-PORT-INDEX > 5
                IF WS-PORT-INDEX NOT = WS-CURRENT-PORT
-                   DISPLAY WS-PORT-NAME(WS-PORT-INDEX) WITH NO ADVANCING
+                    DISPLAY WS-PORT-ID(WS-PORT-INDEX) " - "
+                        WS-PORT-NAME(WS-PORT-INDEX) WITH NO ADVANCING
                    IF WS-PORT-VISITED(WS-PORT-INDEX) = 1
                        DISPLAY "   Deja visite"
                    ELSE
@@ -101,8 +120,18 @@
                END-IF
            END-PERFORM
            DISPLAY " "
-           DISPLAY "Choisissez une destination: " WITH NO ADVANCING
-           ACCEPT WS-ARG
+           MOVE 0 TO WS-EXIT-FLAG
+           PERFORM UNTIL WS-EXIT-FLAG = 1
+               DISPLAY "Choisissez une destination: "
+                   WITH NO ADVANCING
+               ACCEPT WS-ARG
+               IF WS-ARG >= 1 AND WS-ARG <= 5
+                       AND WS-ARG NOT = WS-CURRENT-PORT
+                   MOVE 1 TO WS-EXIT-FLAG
+               ELSE
+                   DISPLAY "Port invalide. Choisissez parmi la liste."
+               END-IF
+           END-PERFORM
            .
 
        DISPLAY-GOODS-TABLE.
@@ -118,4 +147,14 @@
                         WS-CURRENT-PORT WS-GOODS-INDEX) "$"
            END-PERFORM
            DISPLAY "-------------------------------"
+           .
+
+       FLUCTUATE-PRICES.
+           PERFORM VARYING WS-I FROM 1 BY 1 UNTIL WS-I > 5
+               PERFORM VARYING WS-J FROM 1 BY 1 UNTIL WS-J > 5
+                   COMPUTE WS-GOODS-PRICES-PRICE(WS-I, WS-J) =
+                       WS-GOODS-PRICES-PRICE(WS-I, WS-J) *
+                       (0.9 + FUNCTION RANDOM * 0.2)
+               END-PERFORM
+           END-PERFORM
            .
