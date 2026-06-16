@@ -7,6 +7,7 @@ Maritime shipping game in COBOL (GnuCOBOL 3.2.0, portable MinGW).
 ```powershell
 .\setup_env.ps1          # Setup environment
 .\build-game.ps1         # Build game (all modules + main linked into single exe)
+.\test-game.ps1          # Run automated integration tests
 cd bin; .\boat-game.exe  # Run
 ```
 
