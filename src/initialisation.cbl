@@ -20,9 +20,14 @@
            MOVE 0 TO WS-VISITED-PORTS-COUNT
            MOVE "PLAYING" TO WS-STATUS
            MOVE 0 TO WS-FUEL-FLAG
-           MOVE SPACES TO WS-NOTIFICATION
+            MOVE SPACES TO WS-NOTIFICATION
 
-           MOVE 1 TO WS-GOOD-ID(1)
+            PERFORM VARYING WS-I FROM 1 BY 1
+                    UNTIL WS-I > 5
+                MOVE 0 TO WS-CARGO-QUANTITY(WS-I)
+            END-PERFORM
+
+            MOVE 1 TO WS-GOOD-ID(1)
            MOVE "Cafe" TO WS-GOOD-NAME(1)
            MOVE 3000 TO WS-GOOD-BASE-PRICE(1)
            MOVE 2 TO WS-GOOD-ID(2)
@@ -64,14 +69,20 @@
                TO WS-PORT-DESCRIPTION(5)
            MOVE 0 TO WS-PORT-VISITED(5)
 
-           PERFORM VARYING WS-I FROM 1 BY 1 UNTIL WS-I > 5
-               MOVE WS-I TO WS-GOODS-PRICES-PORT-ID(WS-I)
-               PERFORM VARYING WS-J FROM 1 BY 1 UNTIL WS-J > 5
-                   MOVE WS-J TO WS-GOODS-PRICES-GOOD-ID(WS-I, WS-J)
-                   COMPUTE WS-GOODS-PRICES-PRICE(WS-I, WS-J) =
-                       WS-GOOD-BASE-PRICE(WS-J) *
-                       (0.5 + FUNCTION RANDOM)
-               END-PERFORM
-           END-PERFORM
+            PERFORM VARYING WS-I FROM 1 BY 1
+                    UNTIL WS-I > 5
+                MOVE WS-I TO
+                    WS-GOODS-PRICES-PORT-ID(WS-I)
+                PERFORM VARYING WS-J FROM 1 BY 1
+                        UNTIL WS-J > 5
+                    MOVE WS-J TO
+                        WS-GOODS-PRICES-GOOD-ID(WS-I,
+                        WS-J)
+                    COMPUTE WS-GOODS-PRICES-PRICE(WS-I,
+                        WS-J) =
+                        WS-GOOD-BASE-PRICE(WS-J) *
+                        (0.5 + FUNCTION RANDOM)
+                END-PERFORM
+            END-PERFORM
 
            GOBACK.

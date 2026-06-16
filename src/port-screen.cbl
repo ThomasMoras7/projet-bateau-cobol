@@ -8,7 +8,9 @@
        01 WS-PORT-INDEX PIC 9(10).
        01 WS-I PIC 9(10).
        01 WS-J PIC 9(10).
+       01 WS-PRICE PIC 9(10).
        01 WS-EXIT-FLAG PIC 9(01).
+       01 WS-QUANTITY PIC 9(10).
 
        LINKAGE SECTION.
        01 WS-ACTION PIC 9(01).
@@ -59,14 +61,10 @@
                        MOVE "Faites le plein d'abord !"
                            TO WS-NOTIFICATION
                    END-IF
-               WHEN 2
-                   MOVE "Placeholder: acheter"
-                       TO WS-NOTIFICATION
-                   PERFORM DISPLAY-GOODS-TABLE
-               WHEN 3
-                   MOVE "Placeholder: vendre"
-                       TO WS-NOTIFICATION
-                   PERFORM DISPLAY-GOODS-TABLE
+                WHEN 2
+                    PERFORM BUY-GOODS
+                WHEN 3
+                    PERFORM SELL-GOODS
                WHEN 4
                    IF WS-FUEL-FLAG = 1
                        MOVE "Plein deja fait !"
@@ -103,7 +101,101 @@
                    MOVE "WON" TO WS-STATUS
            END-IF
            .
-
+ 
+       BUY-GOODS.
+           PERFORM DISPLAY-GOODS-TABLE
+           MOVE 0 TO WS-EXIT-FLAG
+           PERFORM UNTIL WS-EXIT-FLAG = 1
+               DISPLAY "Quel produit (1-5, 0 = annuler) ? "
+                   WITH NO ADVANCING
+               ACCEPT WS-ARG
+               IF WS-ARG = 0
+                   MOVE "Achat annule." TO WS-NOTIFICATION
+                   MOVE 1 TO WS-EXIT-FLAG
+               ELSE
+                   IF WS-ARG >= 1 AND WS-ARG <= 5
+                       DISPLAY "Quantite: " WITH NO ADVANCING
+                       ACCEPT WS-QUANTITY
+                       IF WS-QUANTITY > 0
+                           COMPUTE WS-PRICE = WS-GOODS-PRICES-PRICE(
+                               WS-CURRENT-PORT WS-ARG) * WS-QUANTITY
+                           IF WS-MONEY >= WS-PRICE
+                               SUBTRACT WS-PRICE FROM WS-MONEY
+                               ADD WS-QUANTITY TO
+                                   WS-CARGO-QUANTITY(WS-ARG)
+                               MOVE "Achat effectue !"
+                                   TO WS-NOTIFICATION
+                           ELSE
+                               MOVE "Pas assez d'argent !"
+                                   TO WS-NOTIFICATION
+                           END-IF
+                       ELSE
+                           MOVE "Quantite invalide."
+                               TO WS-NOTIFICATION
+                       END-IF
+                       MOVE 1 TO WS-EXIT-FLAG
+                   ELSE
+                       DISPLAY "Produit invalide."
+                   END-IF
+               END-IF
+           END-PERFORM
+           .
+ 
+       SELL-GOODS.
+           DISPLAY " "
+           DISPLAY "=== Cargo =============================="
+           DISPLAY "ID  Nom              Quantite  Prix"
+           DISPLAY "----------------------------------------"
+           PERFORM VARYING WS-GOODS-INDEX FROM 1 BY 1
+                   UNTIL WS-GOODS-INDEX > 5
+               IF WS-CARGO-QUANTITY(WS-GOODS-INDEX) > 0
+                   DISPLAY WS-GOOD-ID(WS-GOODS-INDEX) "  "
+                       WS-GOOD-NAME(WS-GOODS-INDEX) "  "
+                       WS-CARGO-QUANTITY(WS-GOODS-INDEX) "  "
+                       WS-GOODS-PRICES-PRICE(
+                           WS-CURRENT-PORT WS-GOODS-INDEX) "$"
+               END-IF
+           END-PERFORM
+           DISPLAY "----------------------------------------"
+           MOVE 0 TO WS-EXIT-FLAG
+           PERFORM UNTIL WS-EXIT-FLAG = 1
+               DISPLAY "Quel produit vendre (1-5, 0 = annuler) ? "
+                   WITH NO ADVANCING
+               ACCEPT WS-ARG
+               IF WS-ARG = 0
+                   MOVE "Vente annulee." TO WS-NOTIFICATION
+                   MOVE 1 TO WS-EXIT-FLAG
+               ELSE
+                   IF WS-ARG >= 1 AND WS-ARG <= 5
+                       IF WS-CARGO-QUANTITY(WS-ARG) > 0
+                           DISPLAY "Quantite: " WITH NO ADVANCING
+                           ACCEPT WS-QUANTITY
+                           IF WS-QUANTITY > 0 AND
+                                   WS-QUANTITY <=
+                                   WS-CARGO-QUANTITY(WS-ARG)
+                           COMPUTE WS-PRICE = WS-GOODS-PRICES-PRICE(
+                               WS-CURRENT-PORT WS-ARG) * WS-QUANTITY
+                           ADD WS-PRICE TO WS-MONEY
+                           SUBTRACT WS-QUANTITY FROM
+                                   WS-CARGO-QUANTITY(WS-ARG)
+                               MOVE "Vente effectuee !"
+                                   TO WS-NOTIFICATION
+                           ELSE
+                               MOVE "Quantite invalide."
+                                   TO WS-NOTIFICATION
+                           END-IF
+                       ELSE
+                           MOVE "Vous n'avez pas ce produit."
+                               TO WS-NOTIFICATION
+                       END-IF
+                       MOVE 1 TO WS-EXIT-FLAG
+                   ELSE
+                       DISPLAY "Produit invalide."
+                   END-IF
+               END-IF
+           END-PERFORM
+           .
+ 
        DISPLAY-PORTS-LIST.
            DISPLAY " "
            DISPLAY "=== Ports disponibles =================="
@@ -136,9 +228,9 @@
 
        DISPLAY-GOODS-TABLE.
            DISPLAY " "
-           DISPLAY "--- Marchandises disponibles ---"
+           DISPLAY "=== Marchandises disponibles ==========="
            DISPLAY "ID  Nom              Prix"
-           DISPLAY "-------------------------------"
+           DISPLAY "----------------------------------------"
            PERFORM VARYING WS-GOODS-INDEX FROM 1 BY 1
                    UNTIL WS-GOODS-INDEX > 5
                DISPLAY WS-GOOD-ID(WS-GOODS-INDEX) "  "
@@ -146,14 +238,18 @@
                     WS-GOODS-PRICES-PRICE(
                         WS-CURRENT-PORT WS-GOODS-INDEX) "$"
            END-PERFORM
-           DISPLAY "-------------------------------"
+           DISPLAY "----------------------------------------"
            .
 
-       FLUCTUATE-PRICES.
-           PERFORM VARYING WS-I FROM 1 BY 1 UNTIL WS-I > 5
-               PERFORM VARYING WS-J FROM 1 BY 1 UNTIL WS-J > 5
-                   COMPUTE WS-GOODS-PRICES-PRICE(WS-I, WS-J) =
-                       WS-GOODS-PRICES-PRICE(WS-I, WS-J) *
+        FLUCTUATE-PRICES.
+           PERFORM VARYING WS-I FROM 1 BY 1
+                   UNTIL WS-I > 5
+               PERFORM VARYING WS-J FROM 1 BY 1
+                       UNTIL WS-J > 5
+                   COMPUTE WS-GOODS-PRICES-PRICE(WS-I,
+                       WS-J) =
+                       WS-GOODS-PRICES-PRICE(WS-I,
+                       WS-J) *
                        (0.9 + FUNCTION RANDOM * 0.2)
                END-PERFORM
            END-PERFORM

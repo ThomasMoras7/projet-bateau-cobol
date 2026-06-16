@@ -16,6 +16,8 @@ cd bin; .\boat-game.exe  # Run
 - **Copybooks** in `src/copybooks/`. Include via `-I src\copybooks`.
 - **All programs interactive** — DISPLAY/ACCEPT in French.
 - **Full variable names only** — never abbreviate. No prefix shortcuts (`WS-GP-` is forbidden, write `WS-GOODS-PRICES-PRICE`). No single-word abbreviations (`TS` instead of `TIMESTAMP`). Every level of the name must be a full, readable word.
+- **No ambiguous names like WS-J, WS-I** — even loop counters and temporary variables must have semantic names (`WS-GOOD-INDEX`, `WS-PRICE`, `WS-PORT-LOOP-INDEX`). Every variable must be self-documenting.
+**Exception**: `WS-I`, `WS-J`, etc. are acceptable for loop iteration indices only (convention). Temporary/computation variables still need full semantic names.
 - **Copybook 1:1 rule** — each copybook contains exactly one `01` level. Never put multiple structures in the same copybook (exception: copybook filename may use mild abbreviation to stay ≤ 8 chars). Suffix convention: `-rec` for records, `-dat` for data tables.
 - **Copybook names ≤ 8 characters** (GnuCOBOL fixed-format limit).
 - **`.gitignore`**: `*.exe`, `*.obj`, `gnu-cobol/**` excluded.

@@ -5,3 +5,4 @@
            05 WS-STATUS         PIC X(10).
            05 WS-FUEL-FLAG      PIC 9(01).
            05 WS-NOTIFICATION   PIC X(60).
+           05 WS-CARGO-QUANTITY PIC 9(10) OCCURS 5.
