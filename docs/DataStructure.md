@@ -41,6 +41,8 @@ Shared between main and subprograms via `LINKAGE SECTION`.
 | `WS-CURRENT-PORT` | `9(10)` | Current port ID |
 | `WS-VISITED-PORTS-COUNT` | `9(10)` | Ports visited count |
 | `WS-STATUS` | `X(10)` | Game status |
+| `WS-FUEL-FLAG` | `9(01)` | Fuel state: 0=empty, 1=full |
+| `WS-NOTIFICATION` | `X(60)` | Toast message displayed on next screen clear |
 
 ---
 

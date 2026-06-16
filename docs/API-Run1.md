@@ -20,7 +20,7 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 ### Issue 1.2 — initialisation module
 
 - [x] Create `src/initialisation.cbl`
-- [x] Receives `GAME-DATA` + `GOODS-PRICES-LIST` via LINKAGE
+- [x] Receives `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` via LINKAGE
 - [x] Sets money=500, current-port=1, visited=0, status="PLAYING"
 - [x] Generates random goods prices for each port (5 goods × 5 ports): base price × (1 ± random(0.5))
 - [x] `GOBACK` to return
@@ -29,48 +29,48 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 
 ### Issue 1.3 — port-screen module
 
-- [ ] Create `src/port.cbl`
-- [ ] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST`
-- [ ] Displays current port name + description + visited status
-- [ ] Shows current money and fuel cost (30) for next trip
-- [ ] Lists goods at current port with buy price
+- [x] Create `src/port-screen.cbl`
+- [x] Receives `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST`
+- [x] Displays current port name + description
+- [x] Shows current money
+- [ ] Shows fuel cost (30) for next trip
+- [x] Lists goods at current port with buy price
 - [ ] Lets user buy goods (select good + quantity, deduct money)
 - [ ] Lets user sell goods from cargo (if carrying any)
 - [ ] Lists other ports with their IDs
 - [ ] Lets user type a port ID or 0 to quit
 - [ ] Validates input: must be a valid port (not current, not out of range)
 - [ ] Sets `ACTION` (0=quit, 1=navigate) and `ARG` (port ID)
-- [ ] Loop until valid choice
-- [ ] `GOBACK` to return
+- [x] Loop until valid choice
+- [x] `GOBACK` to return
 
 **Dependencies**: 1.1
 
 ### Issue 1.4 — main game (game.cbl)
 
-- [ ] Create `src/game.cbl`
-- [ ] Title screen
-- [ ] CALL initialisation (always fresh start)
-- [ ] Builds port table from hardcoded literals (no file I/O)
-- [ ] Game loop:
-  1. CALL port-screen → get action + destination
-  2. If action=0 (quit): set status to "LOST", exit loop
-  3. Fuel check: if money < 30 → display "Not enough fuel!" → CALL end-screen("LOST"), exit loop
-  4. Deduct 30 from money (fuel cost)
-  5. Display travel narrative ("En route from X to Y...", "Arrived at destination!")
-  6. Fluctuate goods prices: each price × (1 ± random(0.1))
-  7. Mark destination port as visited
-  8. Check win: all 5 ports visited → CALL end-screen("WON"), exit loop
-- [ ] No file I/O, no .DAT files, no save/load in RUN 1
-- [ ] STOP RUN
+- [x] Create `src/game.cbl`
+- [x] CALL initialisation with all 4 data params
+- [x] Game loop:
+1. CALL port-screen → get action + destination
+2. EVALUATE action: 0=quit, 1=navigate, other=continue
+3. If navigate and money >= 50000: deduct fuel, reset fuel flag, move port, mark visited, fluctuate prices, set arrival notification, check win
+4. If navigate and money < 50000: set status to "LOST"
+5. If all 5 ports visited: set status to "WON"
+- [x] Price fluctuation on each departure (±10 %)
+- [x] Travel narrative: arrival notification via STRING into WS-NOTIFICATION
+- [x] No file I/O, no save/load in RUN 1
+- [x] CALL end-screen after loop
+- [x] STOP RUN
 
 **Dependencies**: 1.2, 1.3
 
 ### Issue 1.5 — end-screen module
 
-- [ ] Create `src/end-screen.cbl`
-- [ ] Receives `RESULT` ("WON" or "LOST")
-- [ ] Displays end screen with appropriate message
-- [ ] `GOBACK` to return
+- [x] Create `src/end-screen.cbl`
+- [x] Receives `GAME-DATA` via LINKAGE
+- [x] Displays win/lose/quit screen based on WS-STATUS (EVALUATE)
+- [x] Shows final money and port count
+- [x] `GOBACK` to return
 
 **Dependencies**: 1.1
 
@@ -81,6 +81,6 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [ ] Test NEW game: title → port → buy goods → navigate → sell goods → continue
 - [ ] Test WIN: visit all 5 ports → game over screen
 - [ ] Test LOSE: spend all money, try to navigate when money < 30 → "Not enough fuel!" → game over
-- [ ] Test invalid port input: should get "Invalid port, try again."
+- [x] Test invalid port input: should get "Destination invalide."
 
 **Dependencies**: 1.4, 1.5

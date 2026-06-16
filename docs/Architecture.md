@@ -65,17 +65,15 @@ Projet Bateau/
 
 ```
 game (main)
-  ├── CALL initialisation(game-data, goods-prices)  → set initial state + random prices
-  ├── Build port table from hardcoded data
-  ├── LOOP:
-  │     CALL port-screen(action, arg, game-data, port-table, goods-prices)
-  │        → user can buy/sell goods, pick destination
-  │     IF money < 30 → CALL end-screen("LOST")
-  │     Deduct 30 fuel cost
-  │     DISPLAY travel narrative
-  │     Fluctuate goods prices (random ±10 %)
-  │     Mark destination port as visited
-  │     IF all visited → CALL end-screen("WON")
+  ├── CALL initialisation(game-data, port-table, goods-list, goods-prices)
+  │      → sets money, port, visited, status; populates port table + goods + prices
+  ├── LOOP (until status != "PLAYING"):
+  │     ├── CALL port-screen(action, arg, game-data, port-table, goods-list, goods-prices)
+  │     │      → handles menu display, refuel, navigation (fuel check, move, prices, win), buy/sell placeholders
+  │     ├── IF action = 0 → status = "QUIT"
+  │     └── (loop back)
+  ├── CALL end-screen(game-data)
+  │      → displays win/lose/quit message based on status
   └── STOP RUN
 ```
 
@@ -83,11 +81,11 @@ game (main)
 
 | Subprogram | Parameters (USING) | Description |
 |------------|-------------------|-------------|
-| `INITIALISATION` | `GAME-DATA`, `GOODS-PRICES-LIST` | Sets initial money, port, visited + generates prices |
-| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-PRICES-LIST` | Display port + goods + destinations ; buy/sell ; pick destination |
-| `END-SCREEN` | `RESULT` | Win/lose screen |
+| `INITIALISATION` | `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Sets initial state + generates prices + populates all data |
+| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Display port info, menu, handle refuel + navigation (fuel check, move port, prices, win), buy/sell placeholders |
+| `END-SCREEN` | `GAME-DATA` | Win/lose/quit screen based on WS-STATUS |
 
-Travel narrative is inline in the main loop (no separate module needed).
+Navigation logic (fuel, move, prices, win check) is handled inside port-screen. game.cbl only loops and handles quit.
 
 ---
 **Legacy** — Archived banking architecture at [LegacyArchitecture.md](legacy/LegacyArchitecture.md).
