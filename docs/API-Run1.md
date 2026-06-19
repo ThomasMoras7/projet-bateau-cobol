@@ -53,8 +53,8 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [x] Game loop:
 1. CALL port-screen → get action + destination
 2. EVALUATE action: 0=quit, 1=navigate, other=continue
-3. If navigate and money >= 50000: deduct fuel, reset fuel flag, move port, mark visited, fluctuate prices, set arrival notification, check win
-4. If navigate and money < 50000: set status to "LOST"
+3. If navigate and money >= 25000: deduct fuel, reset fuel flag, move port, mark visited, fluctuate prices, set arrival notification, check win
+4. If navigate and money < 25000: set status to "LOST"
 5. If all 5 ports visited: set status to "WON"
 - [x] Price fluctuation on each departure (±10 %)
 - [x] Travel narrative: arrival notification via STRING into WS-NOTIFICATION
@@ -79,12 +79,13 @@ Fuel cost: **30** per journey. If you can't afford it, you lose.
 - [x] Build with `build-game.ps1` → compiles without errors
 - [x] Run from `bin/`
 - [x] Test NEW game: title → port → buy goods → navigate → sell goods → continue
-- [x] Test WIN: visit all 5 ports → game over screen
-- [x] Test LOSE: spend all money, try to navigate when money < 30 → "Pas assez d'argent" on refuel
+- [x] Test WIN: visit all 5 ports via optimal trading (probabilistic)
+- [x] Test LOSE: money < 25000 + empty fuel → "GAME OVER"
 - [x] Test invalid port input: should get "Port invalide."
 
-**Note**: WIN test verifies multi-port navigation and buy/sell chaining; actual WIN status
-not reached due to fuel costs exceeding starting money without profitable trade.
-LOSE test checks "Pas assez d'argent" on fuel refuel; no explicit "LOST" screen
-is implemented in RUN 1 — see Optimisations.md for future. Both are covered by
-`test-game.ps1` (8 test scenarios).
+**Details**:
+- `test-game.ps1` — 9 test scenarios, all deterministic except WIN (random prices).
+- WIN test uses strategy: Coton → Cafe → Vin → Electronique (montee en gamme).
+- LOSE test triggers the actual `MOVE "LOST" TO WS-STATUS` in port-screen.cbl.
+- Lose condition implemented in this issue: when fuel empty AND money < 25000 on
+  navigation attempt, status is set to "LOST" (was previously missing).

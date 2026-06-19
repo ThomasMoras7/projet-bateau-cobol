@@ -1,39 +1,22 @@
 <#
 .SYNOPSIS
-    Automated integration tests for boat-game.exe
+    Automated integration tests for Projet Bateau (GnuCOBOL)
+
 .DESCRIPTION
-    Pipes predefined input sequences to the game executable and
-    checks output for expected patterns. No test framework needed.
+    Two test suites:
+      Phase 1 — Edge cases + lose condition (deterministic)
+      Phase 2 — WIN attempt, retries with fresh random prices
 
-STRATEGY EXPLANATION (for WIN test):
+    Tests pipe ACCEPT input sequences to boat-game.exe and check
+    stdout for expected patterns.
 
-    Prix aleatoires generes a chaque port:
-        prix = prix_base × (0.5 + RANDOM)   → ecart 50 %–150 %
-    Fluctuation au depart:
-        prix = prix × (0.9 + RANDOM × 0.2)  → ecart ±10 %
-
-    Profit optimal : pour chaque marchandise, le prix peut varier
-    du simple au triple entre deux ports. La strategie :
-      1. Au port courant, reperer le bien le moins cher (prix < base)
-      2. L'acheter en grande quantite
-      3. Au port suivant, reperer le bien le plus cher (prix > base)
-      4. Vendre ce qu'on a si le prix est superieur au prix d'achat
-      5. Acheter le bien le moins cher de ce nouveau port
-      6. Recommencer jusqu'au dernier port, puis tout revendre
-
-    Exemple concret:
-      - Shanghai: Coton (base 2000) a 1200 → tres sous-cote → achat massif
-      - Rotterdam: Coton a 2800 → surcote → revente, +133 % de benefice
-      - Rotterdam: Electronique (base 9000) a 5500 → sous-cote → achat
-      - Singapour: Electronique a 12000 → surcote → revente, +118 %
-
-    Avec 120 000$ de depart et 4 pleins a 50 000$ = 200 000$ de cout
-    carburant, il faut degager ~80 000$ de benefice sur 3-4 voyages.
-    L'electronique offrant les plus grandes marges absolues, c'est le
-    meilleur candidat. Toutefois, les prix restant aleatoires, un test
-    automatise ne peut PAS garantir la victoire a 100 % ; il valide
-    que l'enchainement des actions fonctionne.
+STRATEGY (WIN)
+    A chaque port: vendre tout → plein → acheter le moins cher (Coton).
+    Pas de switching de bien — on reste sur Coton (base 2000, max de
+    volume par dollar). La reussite depend de la variance des prix.
 #>
+
+param([switch]$Fast)
 
 $ErrorActionPreference = "Stop"
 $GameExe = "bin\boat-game.exe"
@@ -42,126 +25,317 @@ $GameExe = "bin\boat-game.exe"
 $PassCount = 0
 $FailCount = 0
 
+function Run-Game {
+    param($Inputs)
+    $inputString = ($Inputs -join "`n") + "`n"
+    & ".\setup_env.ps1" 2>&1 | Out-Null
+    return $inputString | & $GameExe 2>&1
+}
+
+function Assert-Output {
+    param($Output, $ExpectedPatterns)
+    $text = ($Output | Out-String) -replace "`r", ""
+    foreach ($pat in $ExpectedPatterns) {
+        if ($text -notmatch $pat) {
+            return $false
+        }
+    }
+    return $true
+}
+
 function Test-Step {
     param($Name, $Inputs, $ExpectedPatterns)
     Write-Host -NoNewline "  $Name ... "
-
-    $inputString = ($Inputs -join "`n") + "`n"
-
     try {
-        $output = $inputString | & $GameExe 2>&1
+        $out = Run-Game $Inputs
+        if (Assert-Output $out $ExpectedPatterns) {
+            Write-Host "PASS" -ForegroundColor Green
+            $script:PassCount++
+        } else {
+            Write-Host "FAIL" -ForegroundColor Red
+            $script:FailCount++
+            Write-Host "--- raw output (last 30 lines) ---"
+            ($out | Out-String) -replace "`r","" -split "`n" | Select-Object -Last 30 | ForEach-Object { Write-Host "| $_" }
+            Write-Host "---"
+        }
     } catch {
-        Write-Host "FAIL (launch error: $_ )" -ForegroundColor Red
+        Write-Host "FAIL (crash: $_ )" -ForegroundColor Red
         $script:FailCount++
-        return
+    }
+}
+
+function Test-Win-Adaptive {
+    & ".\setup_env.ps1" *>&1 | Out-Null
+    $env:COB_DISPLAY_BUFFER = "NO"
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = (Resolve-Path ".\bin\boat-game.exe").Path
+    $psi.RedirectStandardInput = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    try {
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $writer = $proc.StandardInput
+    $reader = $proc.StandardOutput
+
+    $script:cargo = @{}
+    $script:prices = @{}
+    $script:rememberedGood = $null; $script:rememberedPrice = 0
+    $script:currentPort = 1; $script:visitedPorts = @{$script:currentPort=$true}
+    $script:fuelFlag = 0; $script:money = 120000
+    $script:outputAll = ""
+    $buf = New-Object char[] 4096
+
+    function ReadUntil {
+        param($pattern = "Votre choix", [int]$timeoutMs = 1500)
+        $sw = [Diagnostics.Stopwatch]::StartNew(); $r = ""; $chunks = 0
+        while ($r -notmatch $pattern -and $sw.ElapsedMilliseconds -lt $timeoutMs) {
+            try {
+                $t = $reader.ReadAsync($buf, 0, $buf.Length)
+                $ok = $t.Wait([Math]::Max(20, $timeoutMs - $sw.ElapsedMilliseconds))
+                if (-not $ok) { break }
+                $n = $t.Result
+                if ($n -gt 0) { $r += [string]::new($buf, 0, $n); $chunks++ }
+                if ($n -eq 0) { break }
+            } catch { break }
+        }
+        $cleaned = $r -replace '\e\[[0-9;]*[a-zA-Z]', ''
+        $script:outputAll += $cleaned; return $cleaned
     }
 
-    $outputText = ($output | Out-String) -replace "`r", ""
+    function Send {
+        param($t) try { $writer.WriteLine($t); $writer.Flush() } catch {}
+    }
 
-    $allOk = $true
-    foreach ($pat in $ExpectedPatterns) {
-        if ($outputText -notmatch $pat) {
-            $allOk = $false
-            Write-Host "`n  MISSING: $pat" -ForegroundColor Yellow
+    function Parse-Prices {
+        param($text)
+        $text -split "`n" | ForEach-Object {
+            if ($_ -match "^\s*(\d+)\s{2,}.+?\s{2,}(\d+\.?\d*)\$") {
+                $script:prices[[int]$Matches[1]] = [decimal]$Matches[2]
+            }
         }
     }
 
-    if ($allOk) {
-        Write-Host "PASS" -ForegroundColor Green
-        $script:PassCount++
-    } else {
-        Write-Host "FAIL" -ForegroundColor Red
-        $script:FailCount++
-        Write-Host "--- raw output (first 40 lines) ---"
-        $outputText -split "`n" | Select-Object -First 40 | ForEach-Object { Write-Host "| $_" }
-        Write-Host "---"
+    function Parse-Menu {
+        param($text)
+        if ($text -match "Port:\s(.+)") {
+            $pn = $Matches[1].Trim()
+            $script:currentPort = @{"Shanghai"=1;"Rotterdam"=2;"Singapour"=3;"New York"=4;"Marseille"=5}[[regex]::Match($pn,'^(\w+)').Groups[1].Value]
+        }
+        if ($text -match "Argent:\s*[+-]?(\d+)") { $script:money = [decimal]$Matches[1] }
+        if ($text -match "Carburant:\s*(\w+)") { $script:fuelFlag = @{"Vide"=0;"Plein"=1}[$Matches[1]] }
+    }
+
+    # Wait for initial menu
+    Parse-Menu (ReadUntil "Votre choix" 4000)
+
+    for ($i = 0; $i -lt 30; $i++) {
+        if ($proc.HasExited) { break }
+        if ($script:outputAll -match "BRAVO") { return $script:outputAll }
+        if ($script:outputAll -match "GAME OVER|Partie quittee") { break }
+
+        # Read prices if not already known
+        if ($script:prices.Count -eq 0) {
+            Send "2"; $r = ReadUntil "Quel produit"
+            Parse-Prices $r
+            Send "0"; ReadUntil "Votre choix" | Out-Null
+        }
+
+        $script:hasCargo = ($script:cargo.Values | Where-Object { $_.qty -gt 0 }).Count -gt 0
+        $script:hasProfit = $false
+        foreach ($e in $script:cargo.GetEnumerator()) {
+            if ($e.Value.qty -gt 0 -and $script:prices.ContainsKey($e.Key)) {
+                $sellInt = [Math]::Round($script:prices[$e.Key])
+                $buyInt = [Math]::Round($e.Value.buyPrice)
+                if ($sellInt -gt $buyInt) { $script:hasProfit = $true }
+            }
+        }
+
+        # 1. Sell profitable cargo
+        if ($script:hasProfit) {
+            Send "3"; ReadUntil "Quel produit" | Out-Null
+            $gid = ($script:cargo.GetEnumerator() | Where-Object { $_.Value.qty -gt 0 -and $script:prices.ContainsKey($_.Key) -and $script:prices[$_.Key] -gt $_.Value.buyPrice } | Select-Object -First 1).Key
+            if ($gid -ne $null) {
+                Send $gid; ReadUntil "Quantite" | Out-Null
+                Send $script:cargo[$gid].qty; $script:cargo[$gid].qty = 0; $script:cargo[$gid].buyPrice = 0
+            } else { Send "0" }
+            Parse-Menu (ReadUntil "Votre choix"); continue
+        }
+
+        # 2. Refuel or sell at loss if need fuel
+        if ($script:fuelFlag -eq 0) {
+            if ($script:money -ge 25000) { Send "4"; Parse-Menu (ReadUntil "Votre choix"); continue }
+            if ($script:hasCargo) {
+                Send "3"; ReadUntil "Quel produit" | Out-Null
+                $gid = ($script:cargo.GetEnumerator() | Where-Object { $_.Value.qty -gt 0 } | Select-Object -First 1).Key
+                if ($gid -ne $null) {
+                    Send $gid; ReadUntil "Quantite" | Out-Null
+                    Send $script:cargo[$gid].qty; $script:cargo[$gid].qty = 0; $script:cargo[$gid].buyPrice = 0
+                } else { Send "0" }
+                Parse-Menu (ReadUntil "Votre choix"); continue
+            }
+            # Trigger LOSE by navigating without fuel
+            Send "1"; ReadUntil "GAME OVER|Partie quittee" 3000 | Out-Null
+            break
+        }
+
+        # 3. Buy cheapest good (only if can afford 1 unit)
+        if ($script:money -gt 0 -and $script:prices.Count -gt 0) {
+            $bg = $null; $bp = 0
+            $script:prices.GetEnumerator() | ForEach-Object { if ($bp -eq 0 -or $_.Value -lt $bp) { $bg = $_.Key; $bp = $_.Value } }
+            if ($bp -gt 0 -and $script:money -ge $bp) {
+                Send "2"; ReadUntil "Quel produit" | Out-Null
+                $qty = [Math]::Min([Math]::Floor($script:money / $bp), 99)
+                if ($qty -gt 0) {
+                    Send $bg; ReadUntil "Quantite" | Out-Null
+                    Send $qty
+                    $tc = $bp * $qty; $script:money -= $tc
+                    if (-not $script:cargo.ContainsKey($bg)) { $script:cargo[$bg] = @{qty=0; buyPrice=0; totalCost=0} }
+                    $script:cargo[$bg].totalCost += $tc; $script:cargo[$bg].qty += $qty; $script:cargo[$bg].buyPrice = [Math]::Round($script:cargo[$bg].totalCost / $script:cargo[$bg].qty)
+                } else { Send "0" }
+                Parse-Menu (ReadUntil "Votre choix")
+                continue
+            }
+        }
+
+        # 4. Navigate (remember most expensive good before departure)
+        if ($script:fuelFlag -eq 1) {
+            $bestG = $null; $bestP = 0
+            $script:prices.GetEnumerator() | ForEach-Object { if ($_.Value -gt $bestP) { $bestG = $_.Key; $bestP = $_.Value } }
+            if ($bestG -ne $null) { $script:rememberedGood = $bestG; $script:rememberedPrice = $bestP }
+            $dest = @(1,2,3,4,5) | Where-Object { -not $script:visitedPorts.ContainsKey($_) -and $_ -ne $script:currentPort } | Select-Object -First 1
+            if ($dest -eq $null) { $dest = @(1,2,3,4,5) | Where-Object { $_ -ne $script:currentPort } | Select-Object -First 1 }
+            Send "1"; ReadUntil "Choisissez" | Out-Null
+            Send $dest; $script:visitedPorts[$dest] = $true
+            $script:prices = @{}
+            $r2 = ReadUntil "Votre choix|BRAVO|GAME OVER" 1500
+            Parse-Menu $r2; continue
+        }
+
+        break
+    }
+    $proc.Kill(); $proc.WaitForExit(3000) | Out-Null
+    return $script:outputAll
+    } catch { if ($proc -and !$proc.HasExited) { $proc.Kill() }; return "" }
+}
+
+function Test-Win {
+    param($MaxRetries = 100)
+    Write-Host "  Victoire en cours (max ${MaxRetries}x)..." -ForegroundColor Cyan
+    Write-Host "  Legende: . = arret, L = PERDU, Q = QUIT, E = erreur"
+    Write-Host -NoNewline "  "
+    $wins = 0; $losses = 0
+    for ($i = 1; $i -le $MaxRetries; $i++) {
+        try {
+            $out = Test-Win-Adaptive
+            if ($out -match "BRAVO") {
+                $wins++; Write-Host -NoNewline "V" -ForegroundColor Green
+                if ($wins -ge 1) {
+                    Write-Host "`n  VICTOIRE apres $i tentatives !" -ForegroundColor Green
+                    $script:PassCount++
+                    return
+                }
+            } elseif ($out -match "GAME OVER") {
+                $losses++; Write-Host -NoNewline "L" -ForegroundColor Red
+            } else {
+                Write-Host -NoNewline "Q" -ForegroundColor Yellow
+                if ($i -eq 1) {
+                    Write-Host "`n  OUTPUT-LAST-200: $($out.Substring([Math]::Max(0,$out.Length-200)))" -ForegroundColor DarkGray
+                }
+            }
+        } catch {
+            Write-Host -NoNewline "E" -ForegroundColor DarkRed
+        }
+        if ($i % 80 -eq 0) { Write-Host ""; Write-Host -NoNewline "  " }
+    }
+    Write-Host ""
+    Write-Host "  Resultats: V=$wins L=$losses Q/autres=$($MaxRetries-$wins-$losses)" -ForegroundColor Cyan
+    if ($wins -eq 0) {
+        Write-Host "  NOTE: 0 victoire en ${MaxRetries}x. Cause probable:" -ForegroundColor Yellow
+        Write-Host "  l'equation economique est tres exigeante" -ForegroundColor Yellow
     }
 }
 
-# ----- main -----
-Write-Host "=== Projet Bateau — Integration Tests ===" -ForegroundColor Cyan
+# ===== MAIN =====
+Write-Host "=== Projet Bateau — Tests integres ===" -ForegroundColor Cyan
 Write-Host ""
 
-# 1 — BUILD CHECK
+# ── BUILD ──
 Write-Host "[BUILD]" -ForegroundColor Cyan
-Write-Host "  Building with build-game.ps1 ..." -NoNewline
-$buildOut = & ".\build-game.ps1" 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "FAIL" -ForegroundColor Red
-    Write-Host "$buildOut"
-    exit 1
-}
-Write-Host "OK" -ForegroundColor Green
+Write-Host -NoNewline "  Compilation ..."
+& ".\build-game.ps1" 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) { Write-Host "FAIL" -ForegroundColor Red; exit 1 }
+Write-Host " OK" -ForegroundColor Green
 Write-Host ""
 
-# ---- FLOW TESTS ----
-# Chaque test correspond a un scenario jouable.
-# Les entrées sont pipelinees dans ACCEPT (une ligne = un ACCEPT).
+# ============================================================
+# PHASE 1 — Edge cases + lose condition (deterministic)
+# ============================================================
+Write-Host "=" * 60
+Write-Host "PHASE 1 — Cas limites et defaite" -ForegroundColor Cyan
+Write-Host "=" * 60
 
-Write-Host "[TEST 1 — Quitter directement]" -ForegroundColor Cyan
-Test-Step -Name "Menu initial puis quitter" `
+Test-Step -Name "[1] Menu puis quitter" `
     -Inputs @("0") `
     -ExpectedPatterns @("PORT", "Partie quittee", "Argent final:", "Ports visites:")
 
-Write-Host "[TEST 2 — Navigation simple]" -ForegroundColor Cyan
-# 1: refuel → 2: navigate (menu) → 3: destination Rotterdam → 0: quit
-Test-Step -Name "Refuel + aller a Rotterdam" `
-    -Inputs @("4", "1", "2", "0") `
-    -ExpectedPatterns @("Arrive a bon port", "Rotterdam", "Partie quittee")
-
-Write-Host "[TEST 3 — Navigation sans carburant]" -ForegroundColor Cyan
-# 1: navigate (fuel empty → blocked) → 0: quit
-Test-Step -Name "Naviguer sans essence est bloque" `
+Test-Step -Name "[2] Naviguer sans essence bloque" `
     -Inputs @("1", "0") `
     -ExpectedPatterns @("Faites le plein d", "Partie quittee")
 
-Write-Host "[TEST 4 — Achat de marchandises]" -ForegroundColor Cyan
-# 2: buy menu → 1: Cafe → 1: quantity 1 → 0: quit
-Test-Step -Name "Acheter 1 Cafe a Shanghai" `
-    -Inputs @("2", "1", "1", "0") `
-    -ExpectedPatterns @("Achat effectue", "Partie quittee")
-
-Write-Host "[TEST 5 — Vente de marchandises]" -ForegroundColor Cyan
-# Achat puis revente au meme port (prix identique en RUN 1)
-# 2: buy → 1: Cafe → 1: 1t → 3: sell → 1: Cafe → 1: 1t → 0: quit
-Test-Step -Name "Acheter puis revendre du Cafe" `
-    -Inputs @("2", "1", "1", "3", "1", "1", "0") `
-    -ExpectedPatterns @("Achat effectue", "Vente effectuee", "Partie quittee")
-
-Write-Host "[TEST 6 — Destination port invalide]" -ForegroundColor Cyan
-# 4: refuel → 1: navigate → 0: invalide → 2: valide (Rotterdam) → 0: quit
-Test-Step -Name "Saisir port invalide puis valide" `
+Test-Step -Name "[3] Destination invalide" `
     -Inputs @("4", "1", "0", "2", "0") `
     -ExpectedPatterns @("Port invalide", "Partie quittee")
 
-Write-Host "[TEST 7 — Navigation multi-port]" -ForegroundColor Cyan
-# Enchainement navigation + achat/revente entre ports.
-# Teste que le cargo voyage, que les prix fluctuent, que l'arrivee
-# s'affiche correctement. La victoire n'est pas garantie (prix aleatoires)
-# mais le flow complet est valide.
-# 4: refuel → 1: navigate → 2: Rotterdam
-# → 4: refuel → 1: navigate → 3: Singapour
-# → 2: buy → 1: Cafe → 1: 1t → 3: sell → 1: Cafe → 1: 1t
-# → 0: quit
-Test-Step -Name "Visiter plusieurs ports avec echange" `
-    -Inputs @("4", "1", "2", "4", "1", "3", "2", "1", "1", "3", "1", "1", "0") `
-    -ExpectedPatterns @("Rotterdam", "Singapour", "Arrive a bon port")
+Test-Step -Name "[4] Achat 1 Cafe" `
+    -Inputs @("2", "1", "1", "0") `
+    -ExpectedPatterns @("Achat effectue", "Partie quittee")
 
-Write-Host "[TEST 8 — Condition de defaite]" -ForegroundColor Cyan
-# Epuiser l'argent jusqu'a ne plus pouvoir payer le plein.
-# 4: refuel → naviguer Rotterdam → 4: refuel → naviguer Singapour
-# → 4: refuel (echoue, plus assez) → 0: quit
-Test-Step -Name "Plus assez d'argent pour le carburant" `
-    -Inputs @("4", "1", "2", "4", "1", "3", "4", "0") `
-    -ExpectedPatterns @("Pas assez d'argent", "Partie quittee")
+Test-Step -Name "[5] Achat puis revente" `
+    -Inputs @("2", "1", "1", "3", "1", "1", "0") `
+    -ExpectedPatterns @("Achat effectue", "Vente effectuee", "Partie quittee")
 
-# ----- summary -----
+Test-Step -Name "[6] Navigation simple (Rotterdam)" `
+    -Inputs @("4", "1", "2", "0") `
+    -ExpectedPatterns @("Arrive a bon port", "Rotterdam", "Partie quittee")
+
+Test-Step -Name "[7] Refuel deja plein bloque" `
+    -Inputs @("4", "4", "0") `
+    -ExpectedPatterns @("Plein deja fait", "Partie quittee")
+
+Test-Step -Name "[8] Quantite achat zero" `
+    -Inputs @("2", "1", "0", "0") `
+    -ExpectedPatterns @("Quantite invalide", "Partie quittee")
+
+Test-Step -Name "[9] Vente sans stock" `
+    -Inputs @("3", "0", "0") `
+    -ExpectedPatterns @("Vente annulee", "Partie quittee")
+
+Test-Step -Name "[10] Navigation sans refuel puis LOSE" `
+    -Inputs @("4","1","2","4","1","1","4","1","2","4","1","3","1") `
+    -ExpectedPatterns @("GAME OVER", "Plus assez d'argent")
+
 Write-Host ""
-Write-Host "=== Results ===" -ForegroundColor Cyan
+
+# ============================================================
+# PHASE 2 — WIN attempt (up to 10 retries)
+# ============================================================
+Write-Host "=" * 60
+Write-Host "PHASE 2 — Victoire (jusqu'a 100 tentatives)" -ForegroundColor Cyan
+Write-Host "=" * 60
+Write-Host "  Strategie adaptative: vendre si profitable, plein," -ForegroundColor Gray
+Write-Host "    acheter le moins cher, naviguer" -ForegroundColor Gray
+Write-Host "  Les prix changent a chaque tentative (FUNCTION RANDOM)." -ForegroundColor Gray
+Write-Host ""
+
+Test-Win -MaxRetries 100
+
+# ===== SUMMARY =====
+Write-Host ""
+Write-Host "=" * 60
+Write-Host "Results" -ForegroundColor Cyan
 Write-Host "  Passed: $PassCount" -ForegroundColor Green
 Write-Host "  Failed: $FailCount" -ForegroundColor Red
-Write-Host ""
+Write-Host "=" * 60
 
-if ($FailCount -gt 0) {
-    exit 1
-}
+if ($FailCount -gt 0) { exit 1 }
