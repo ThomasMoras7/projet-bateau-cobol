@@ -1,62 +1,53 @@
-# Projet Bateau — Game Design Document
+[Index](Index.md) > GameDesign
+
+# Projet Bateau — Game Design
 
 ## Concept
 
-A turn-based maritime shipping game written in COBOL. You inherit a wreck and must build a trading empire — or sink trying. Roguelike, with absurd humor.
-
-## Tone
-
-Self-deprecating absurd humor.
+Turn-based maritime trading game in COBOL. Inherit a wreck, buy low and sell high across 5 ports, manage fuel costs. Roguelike one-sitting format with absurd humor.
 
 ## Core Loop
 
-Navigate between ports, buy low and sell high, manage fuel costs.
-
-1. Buy goods at current port
-2. Pick a destination port
-3. Pay fuel cost to depart
-4. Arrive at destination
-5. Sell goods, buy new ones
-6. Repeat
-
-Lose: cannot afford fuel to reach any other port.
+1. Arrive at port → see current info + goods prices
+2. Sell cargo (if profitable), refuel (50k), buy goods
+3. Pick a destination → pay fuel → depart
+4. Arrive → prices fluctuate → repeat
+5. Visit all 5 ports to win. Can't afford fuel? Lose.
 
 ## Goods
 
-Five types of cargo, each with a base price. Prices vary per port.
-
-Starting capital: **120 000 $**. Goods are priced per ton.
-
-| # | Good | Base Price ($/ton) |
+| # | Good | Base Price |
 |---|------|-----------|
-| 1 | Coffee | 3 000 |
-| 2 | Cotton | 2 000 |
-| 3 | Spices | 5 500 |
-| 4 | Wine | 4 000 |
-| 5 | Electronics | 9 000 |
+| 1 | Cafe | 3 000 |
+| 2 | Coton | 2 000 |
+| 3 | Epices | 5 500 |
+| 4 | Vin | 4 000 |
+| 5 | Electronique | 9 000 |
 
-**Price generation** : at game start, each port gets a random buy price for each good:
-initial price = base price × (1 ± random(0.5)) — large ±50 % variation.
-At each departure, all prices fluctuate slightly: current price × (1 ± random(0.1)) — small ±10 %.
+Prices per port randomized at game start: `base × (0.5 + RANDOM)` → from 50 % to 150 %. Each departure fluctuates all prices: `current × (0.9 + RANDOM × 0.2)` → from 90 % to 110 %.
 
-## Ports (RUN 1, hardcoded)
+## Ports
 
 | # | Name | Description |
 |---|------|-------------|
-| 1 | Shanghai (China) | Le plus grand port du monde. Trafic non-stop. |
-| 2 | Rotterdam (Netherlands) | Porte d'entrée de l'Europe. Attention aux écluses. |
-| 3 | Singapore | Plateforme asiatique ultra-moderne. |
-| 4 | New York (USA) | La statue de la Liberté veille sur le port. |
-| 5 | Marseille (France) | Le premier port de France. Le pastis coule à flots. |
+| 1 | Shanghai (Chine) | Le plus grand port du monde. Trafic non-stop. |
+| 2 | Rotterdam (Pays-Bas) | Porte d'entree de l'Europe. Attention aux ecluses. |
+| 3 | Singapour (Singapour) | Plateforme asiatique ultramoderne. Taxes ultra basses. |
+| 4 | New York (Etats-Unis) | La statue de la Liberte veille sur les bateaux. |
+| 5 | Marseille (France) | Le premier port de France. Le pastis coule a flots. |
+
+Starting port: Shanghai.
 
 ## Fuel
 
-The ship has a fuel tank (flag: empty/full). Refueling costs **50 000 $**. Navigation is only possible when the tank is full. After each journey the tank empties.
+Binary state: empty (0) or full (1), starts empty. Refuel costs **50 000 $**. Navigation empties the tank. Lose if fuel is empty AND money < 50 000 when attempting to depart.
 
-Starting fuel: empty.
+## Win / Lose
 
-## Future RUNs (draft)
+- **Win**: `WS-VISITED-PORTS-COUNT >= 5` (visit all 5 ports)
+- **Lose**: fuel empty, money < 50 000, player tries to navigate → `MOVE "LOST" TO WS-STATUS`
+- **Quit**: option 0 at any time
 
-- **RUN 2** : save/load game state, delivery contracts, refined economy
-- **RUN 3** : multiple ships, shipyard, fleet management
-- **RUN 4** : UI polish, balance tuning, difficulty modes
+## Code
+
+GnuCOBOL 3.2.0 (portable MinGW). Single executable. All user-facing text in French. No comments in code — documentation is the source of truth.

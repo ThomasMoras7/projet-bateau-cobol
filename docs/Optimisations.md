@@ -1,3 +1,5 @@
+[Index](Index.md) > Optimisations
+
 # Optimisations
 
 | Category | Code | Description |
@@ -7,76 +9,58 @@
 | Externalisation | `EXT` | Config files, no magic numbers/strings |
 | Simplification | `SIM` | More lightweight, no unasked flavor text, no superfluous |
 
-## Planned
+---
 
-### FAC-1 — Decouper port-screen.cbl en sous-programmes specialises (RUN 2+)
+## Open
 
-Le fichier `src/port-screen.cbl` contient toute la logique d'interface portuaire :
-menu, achat, vente, navigation, refuel, fluctuation des prix. A terme, chaque
-fonction pourrait etre extraite dans son propre sous-programme :
+### OPT-1 — Deterministic WIN test 🟡
 
-- `buy-screen.cbl` — logique d'achat
-- `sell-screen.cbl` — logique de vente
-- `navigation-screen.cbl` — logique de navigation
-- `port-screen.cbl` — allège (menu + orchestration)
+The adaptive WIN test (`Test-Win-Adaptive`) is probabilistic because `FUNCTION RANDOM` accepts no documented seed. Prices differ every run, so victory is not guaranteed (practical success rate ~1-5 attempts, but unbounded in theory).
 
-Interet : isoler les responsabilites, reduire la taille de chaque module,
-faciliter les tests manuels, et eviter les conflits de WORKING-STORAGE.
+Solutions:
+- **Option A** — Test mode via env variable: if `TEST_MODE=1`, skip `FUNCTION RANDOM` in `initialisation.cbl` and use fixed profitable prices.
+- **Option B** — Verify whether `FUNCTION RANDOM(seed)` works in GnuCOBOL 3.2 to fix the generator.
 
-Necessite RUN 2+ car les CALL avec LINKAGE sections ajoutent de la complexite.
-Pour RUN 1, tout reste dans port-screen.cbl.
+### OPT-2 — "New York" not parsed by test regex 🟢
 
-### SIM-1 — Supprimer les declarations inutilisees
+The regex `^(\w+)` in `Parse-Menu` captures only `"New"` instead of `"New York"`. The port lookup returns `$null` for ports 4 and 5. The test still functions (destination chosen from unvisited list), but the internal state display is incomplete.
 
-Apres les renommages, certaines variables WORKING-STORAGE peuvent devenir
-orphelines (ex: `WS-I` dans port-screen.cbl apres renommage en
-`WS-LOOP-PORT-INDEX`). A nettoyer lors d'un futur refactoring.
+### OPT-3 — "CLS" CALL spawns a process every screen 🟢
 
-### OPT-1 — Test victoire deterministe
+`CALL "SYSTEM" USING "cls"` creates a new OS process on every port-screen iteration and at end-screen. ANSI escape sequences (`\e[2J\e[H`) could clear the screen directly without the overhead.
 
-Le test WIN (`test-game.ps1` #7) ne peut pas garantir la victoire car les
-prix sont aleatoires. Deux solutions pour un test WIN deterministe :
+### OPT-4 — WS-EXIT-FLAG pattern verbose 🟢
 
-**Option A — Seed fixe pour FUNCTION RANDOM**
+Input validation loops in BUY-GOODS, SELL-GOODS, and DISPLAY-PORTS-LIST use a dedicated `WS-EXIT-FLAG` variable with `PERFORM UNTIL`. COBOL supports `EXIT PERFORM` which would eliminate the flag variable entirely.
 
-Si GnuCOBOL permet d'initialiser `FUNCTION RANDOM` avec une seed via
-`MOVE <valeur> TO RANDOM-SEED` (ou equivalent), les memes entrees
-produiront toujours les memes prix. Le test WIN peut alors etre cale sur
-cette seed. A investiguer.
+### FAC-1 — "CLS" call repeated 🟢
 
-**Option B — Mode test avec prix previsibles**
+`CALL "SYSTEM" USING "cls"` appears in both `port-screen.cbl` and `end-screen.cbl`. A shared `CLEAR-SCREEN` paragraph would avoid duplication and centralise any future migration to ANSI escapes.
 
-Ajouter une variable d'environnement `TEST_MODE=1` lue au demarrage :
-- Dans `initialisation.cbl`, ignorer `FUNCTION RANDOM`, utiliser des prix
-  fixes garantissant un profit (ex: Electronique a 5000 à Shanghai, 12000
-  a Rotterdam, 6000 a Singapour…).
-- Pas de fluctuation au depart.
-- Le test WIN devient reproductible a 100 %.
+### FAC-2 — Price fluctuation loop duplicated 🟢
 
-Interet supplementaire : les autres tests (achat/revente, navigation)
-restent valables sur des prix fixes sans surprise.
+The nested loop (`VARYING I/J UNTIL > 5` with `FUNCTION RANDOM`) appears in both `initialisation.cbl` (price generation) and `port-screen.cbl` (price fluctuation). Only the formula differs: `BASE × (0.5 + RANDOM)` vs `CURRENT × (0.9 + RANDOM × 0.2)`. A single paragraph parameterised by formula would DRY this up.
 
-Inconvenient : complexite supplementaire pour RUN 1. A implementer en RUN 2
-ou avant si les tests deviennent critiques.
+### EXT-1 — 50000 fuel cost hardcoded 🔴
 
-### OPT-2 — Strategie de trading (documentation)
+The value 50000 appears 4× in `port-screen.cbl`: refuel check, refuel cost, lose threshold, and display string. Should be a named constant or config value.
 
-L'economie du jeu repose sur un ecart de prix aleatoire entre ports :
-`prix = base × (0.5 + RANDOM)`. Un meme bien peut valoir 50 % ou 150 %
-de son prix de base selon le port. La strategie optimale s'appuie sur
-cet ecart :
+### EXT-2 — 120000 starting money hardcoded 🟡
 
-1. **Reperer le bien le moins cher** au port courant (prix < base)
-2. **Acheter en quantite** (le cargo est illimite en RUN 1)
-3. **Au port suivant, reperer le bien le plus cher** (prix > base)
-4. **Vendre** ce qu'on transporte si le prix est superieur au prix d'achat
-5. **Acheter le bien le moins cher** de ce nouveau port
-6. **Recommencer** jusqu'au dernier port, puis tout revendre
+Starting money is a literal in `initialisation.cbl`. Should be a named constant for easier balancing.
 
-L'electronique (base 9000) offre les meilleures marges absolues :
-  - A 5000 a Shanghai, revendu 12000 a Rotterdam → +140 % (7000$ × N tonnes)
-  - De quoi financer largement les 4 pleins (200 000$)
+### EXT-3 — Magic numbers in price formulas 🟢
 
-A noter : en RUN 1, les prix d'achat et de vente au meme port sont
-identiques. La marge ne se fait que par l'ecart inter-ports. RUN 2+
-pourrait introduire un spread achat/vente (ex: -10 % / +10 %).
+Price computation uses raw decimals (`0.5`, `0.9`, `0.2`) with no named constants. These should be declared as `WS-PRICE-MIN-FACTOR`, `WS-PRICE-FLUCT-LOW`, `WS-PRICE-FLUCT-RANGE` (or similar) for clarity.
+
+### EXT-4 — Goods and ports data hardcoded 🟢
+
+Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2+ should load them from data files.
+
+### SIM-1 — Dead code in WS-ACTION 0 handler 🟡
+
+The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Placeholder: quitter"`). This notification is never displayed — `game.cbl` immediately catches `WS-ACTION = 0`, sets status to `"QUIT"`, and calls `END-SCREEN` directly. The notification assignment is unreachable dead code.
+
+### SIM-2 — WS-CLS-COMMAND variable unnecessary 🟢
+
+The workspace variable `WS-CLS-COMMAND` (PIC X(03) `"cls"`) is declared only to be passed to `CALL "SYSTEM"`. The literal `"cls"` can be inlined directly in the `CALL` statement, removing the variable.

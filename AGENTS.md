@@ -17,7 +17,7 @@ cd bin; .\boat-game.exe  # Run
 - **Copybooks** in `src/copybooks/`. Include via `-I src\copybooks`.
 - **All programs interactive** — DISPLAY/ACCEPT in French.
 - **Full variable names only** — never abbreviate. No prefix shortcuts (`WS-GP-` is forbidden, write `WS-GOODS-PRICES-PRICE`). No single-word abbreviations (`TS` instead of `TIMESTAMP`). Every level of the name must be a full, readable word.
-- **No ambiguous names like WS-J, WS-I** — even loop counters and temporary variables must have semantic names (`WS-GOOD-INDEX`, `WS-PRICE`, `WS-PORT-LOOP-INDEX`). Every variable must be self-documenting.
+- **No ambiguous names** — even loop counters and temporary variables must have semantic names (`WS-GOOD-INDEX`, `WS-PRICE`, `WS-PORT-LOOP-INDEX`). Every variable must be self-documenting.
 **Exception**: `WS-I`, `WS-J`, etc. are acceptable for loop iteration indices only (convention). Temporary/computation variables still need full semantic names.
 - **Copybook 1:1 rule** — each copybook contains exactly one `01` level. Never put multiple structures in the same copybook (exception: copybook filename may use mild abbreviation to stay ≤ 8 chars). Suffix convention: `-rec` for records, `-dat` for data tables.
 - **Copybook names ≤ 8 characters** (GnuCOBOL fixed-format limit).
@@ -28,7 +28,7 @@ cd bin; .\boat-game.exe  # Run
 
 ## Lose condition (RUN 1)
 
-Player loses when `money < fuel_cost` (25000) at the moment of trying to depart.
+Player loses when `money < fuel_cost` (50000) at the moment of trying to depart.
 Win: visit all 5 ports.
 
 ## COBOL coding style
@@ -71,6 +71,44 @@ Win: visit all 5 ports.
 - When a task is multi-step, add intermediate commit prompts.
 - No speculation — only implement what the spec says.
 
-## Legacy
+## Documentation style
+
+### File layout
+```
+docs/
+├── Index.md              # Root index — simple list of links
+├── data/index.md         # Copybook index — link list + concepts (price algorithm, display format)
+├── data/name-dat.md      # One file per copybook — structure table (Field, Level, PIC, Usage) + notes
+├── api/index.md          # Program index — simple list of links
+├── api/API-Name.md       # One file per program — see section order below
+└── (other top-level .md) # GameDesign, Features, Architecture, Optimisations, Changelog
+```
+
+### Section order per API doc
+
+```
+# Title
+
+## Overview          — one paragraph: what it does, who calls it
+## Sommaire          — clickable TOC (only sections that exist)
+## Data
+### LINKAGE          — table: copybook, direction, usage (link to data/name-dat.md)
+### Parameters       — table: name, level, PIC, direction, usage (only if parameters exist)
+### Workspace        — table: variable, level, type, usage
+## Procedure           — only if the program has declared paragraphs
+                     — summary table: paragraph, role, arguments
+                     — then one subsection per paragraph with step-by-step
+                     — arguments: only list what the handler actually receives (e.g. WS-ARG), not the trigger action (e.g. WS-ACTION)
+## Flow              — main execution flow (high-level, NOT duplicating Procedure)
+## Error Handling    — table: condition, behavior
+## Rules             — one-shot design rules, edge cases
+```
+
+### Content rules
+
+- **Copybook docs**: one file per copybook in `data/`. Structure as table with columns: Field, Level, PIC, Usage. Concept notes (e.g. notification lifecycle) as prose below the table.
+- **API LINKAGE**: table with columns: copybook (linked), direction, usage. Point to `../data/copybook-name.md`, never expand fields inline.
+- **French UI text**: reproduce DISPLAY strings verbatim in French where referenced.
+- **No abbreviations**: match COBOL variable naming conventions in docs.
 
 Old banking programs (`src/account-creation.cbl`, etc.) remain on disk but are superseded by the game. Git history preserves them. The `build.ps1` script is kept for reference; use `build-game.ps1` for the game.

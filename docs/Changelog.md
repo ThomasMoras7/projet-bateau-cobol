@@ -1,24 +1,38 @@
 # Changelog
 
-## v0.2.0 — Account Operations & Tooling
+## v1.0.0 — RUN 1 : Navigation Basics
 
 ### Added
-- `search-account-balance.cbl` — search balance by ID
-- `transfer-money.cbl` — transfer funds between two accounts
-- `build.ps1` — automated build script for all programs
-- Standardized API documentation model
+- Full game loop with start, port interactions, and end screen
+- Port menu: buy goods, sell goods, refuel, navigate to next port
+- 5 ports to visit (Shanghai, Rotterdam, Singapour, New York, Marseille)
+- 5 goods to trade (Cafe, Coton, Epices, Vin, Electronique)
+- Fuel system: costs 50 000$ to fill, required before each departure
+- Win condition: visit all 5 ports
+- Lose condition: stranded with empty tank and less than 50 000$
+- Automated test suite with 10 edge cases and adaptive WIN strategy
+- One-command build script
+
+### Improved
+- Screen output switched to stdout — now works correctly with Windows pipes
+- All variable names made self-documenting (full words, no abbreviations)
+- Test suite handles ANSI escape codes from screen clears, V99 decimal display, and adaptive retry logic
 
 ### Changed
-- Improved wiki (Index, Features, Architecture)
-- Harmonized all API documentation files
+- Non-standard `ELSE IF` replaced with standard COBOL nested `ELSE`/`IF`/`END-IF`
 
-## v0.1.0 — Initial Prototype
+## v0.2.0 — Account Operations (banking prototype, superseded)
 
 ### Added
-- `account-creation.cbl` — create account with auto-incremented ID
-- `account-deletion.cbl` — delete account by ID
-- `account-list.cbl` — list all accounts
-- Portable GnuCOBOL 3.2.0 environment (`gnu-cobol/`)
-- `setup_env.ps1` — PowerShell environment initializer
-- Auto-creation of data files on first run
+- Bank account search and money transfer between accounts
+- Build script
+
+### Improved
+- Documentation structure (wiki index, features, architecture)
+
+## v0.1.0 — Initial Prototype (banking, superseded)
+
+### Added
+- Create, delete, and list bank accounts
+- Portable GnuCOBOL 3.2.0 environment with automatic data file creation
 - Project wiki in `docs/`

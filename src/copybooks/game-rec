@@ -1,5 +1,0 @@
-       01 GAME-RECORD.
-           05 GAME-MONEY                  PIC S9(10)V99.
-           05 GAME-CURRENT-PORT           PIC 9(10).
-           05 GAME-VISITED-PORTS-COUNT    PIC 9(10).
-           05 GAME-STATUS                 PIC X(10).

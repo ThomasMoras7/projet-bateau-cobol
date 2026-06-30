@@ -1,91 +1,66 @@
+[Index](Index.md) > Architecture
+
 # Architecture
 
-## Project Hierarchy
+## Project layout
 
 ```
 Projet Bateau/
-├── README.md                  # Game description, quick start
-├── setup_env.ps1              # Env initializer (PATH, COB_* vars) — shared
-├── build-game.ps1              # Build script for game
-├── .gitignore                 # Excludes exe, obj, gnu-cobol/, .vscode/
-├── LICENSE
+├── setup_env.ps1           # Env init (PATH, COB_* vars)
+├── build-game.ps1          # Build: cobc -x game.cbl + subprograms → boat-game.exe
+├── test-game.ps1           # Integration test suite
+├── AGENTS.md               # Agent instructions
 │
-├── gnu-cobol/                 # Portable GnuCOBOL 3.2.0 (gitignored)
+├── src/                    # COBOL sources
+│   ├── game.cbl            # Main — loop, quit check
+│   ├── initialisation.cbl  # Init state + prices
+│   ├── port-screen.cbl     # Port display, menu, buy/sell/refuel/navigate
+│   ├── end-screen.cbl      # Win/lose/quit screen
+│   └── copybooks/
+│       ├── game-dat        # WS-GAME-DATA (LINKAGE structure)
+│       ├── port-dat        # WS-PORT-TABLE (5 ports)
+│       ├── gds-dat         # WS-GOODS-LIST (5 goods, base prices)
+│       └── pric-dat        # WS-GOODS-PRICES-LIST (5×5 price grid)
 │
-├── src/                       # COBOL source files
-│   ├── [game]
-│   │   ├── game.cbl               #   Main program — game loop
-│   │   ├── initialisation.cbl     #   Initialize game state + prices
-│   │   ├── port-screen.cbl        #   Port screen: display, market, navigation
-│   │   ├── end-screen.cbl         #   Win/lose end screen
-│   │   ├── copybooks/
-│   │   │   ├── port-dat           #   Port table in WORKING-STORAGE
-│   │   │   ├── game-rec           #   Game save record (RUN 2+)
-│   │   │   ├── game-dat          #   Game state shared between modules
-│   │   │   ├── gds-dat           #   Goods list (5 goods with base prices)
-│   │   │   └── pric-dat          #   Goods prices grid (5 ports × 5 goods)
-│   │   │   ├── acc-rec            #   Legacy (banking)
-│   │   │   └── tran-rec           #   Legacy (banking)
-│   │
-│   └── [legacy] — superseded, git history preserves it
-│       ├── account-creation.cbl
-│       ├── account-deletion.cbl
-│       ├── account-list.cbl
-│       ├── history-list.cbl
-│       ├── search-account-balance.cbl
-│       ├── transfer-money.cbl
-│       └── build.ps1
+├── bin/boat-game.exe       # Build output (gitignored)
 │
-├── bin/                       # Build output
-│   ├── boat-game.exe          #   (gitignored)
-│   ├── PORTS.DAT              #   Indexed port records (RUN 2+)
-│   └── GAME.DAT               #   Sequential game save (RUN 2+)
+├── gnu-cobol/              # Portable GnuCOBOL 3.2.0 MinGW (gitignored)
 │
-└── docs/                      # Project wiki
-    ├── Index.md
-    ├── GameDesign.md
-    ├── Features.md
-    ├── Architecture.md
-    ├── DataStructure.md
-    ├── API.md
-    ├── API-Run1.md
-    ├── API-Run2.md
-    ├── API-Run3.md
-    ├── API-Run4.md
-    └── Changelog.md
+├── docs/                   # Wiki
+└── src/[legacy]            # Archived banking programs (git history)
 ```
 
-## Design Principles
-
-- **Main + subprograms** (provisional) : currently split into modules for clarity.
-- **Single executable** : all modules compiled together via `cobc -x main.cbl mod1.cbl ...` into one `.exe`
-- **No `.DAT` files in RUN 1** : state is purely in-memory. Persistence is planned for RUN 2+.
-
-## Data Flow (RUN 1)
+## Data flow
 
 ```
-game (main)
-  ├── CALL initialisation(game-data, port-table, goods-list, goods-prices)
-  │      → sets money, port, visited, status; populates port table + goods + prices
-  ├── LOOP (until status != "PLAYING"):
-  │     ├── CALL port-screen(action, arg, game-data, port-table, goods-list, goods-prices)
-  │     │      → handles menu display, refuel, navigation (fuel check, move, prices, win), buy/sell placeholders
-  │     ├── IF action = 0 → status = "QUIT"
+game.cbl
+  ├── CALL INITIALISATION (game-data, port-table, goods-list, prices-list)
+  │      → money=120000, port=1, fuel=0, cargo empty, goods 1..5, ports 1..5, random prices
+  ├── LOOP (until status ≠ "PLAYING"):
+  │     ├── CALL PORT-SCREEN (action, arg, game-data, port-table, goods-list, prices-list)
+  │     │      → displays port screen, handles menu, returns action+arg
+  │     ├── IF action = 0 → MOVE "QUIT" TO status
   │     └── (loop back)
-  ├── CALL end-screen(game-data)
-  │      → displays win/lose/quit message based on status
+  ├── CALL END-SCREEN (game-data) → displays result
   └── STOP RUN
 ```
 
-## Module Interfaces (RUN 1)
+## Module interfaces
 
-| Subprogram | Parameters (USING) | Description |
-|------------|-------------------|-------------|
-| `INITIALISATION` | `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Sets initial state + generates prices + populates all data |
-| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Display port info, menu, handle refuel + navigation (fuel check, move port, prices, win), buy/sell placeholders |
-| `END-SCREEN` | `GAME-DATA` | Win/lose/quit screen based on WS-STATUS |
+| Subprogram | Parameters | Role |
+|---|---|---|
+| `INITIALISATION` | `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Set initial values, populate tables, generate random prices |
+| `PORT-SCREEN` | `ACTION`, `ARG`, `GAME-DATA`, `PORT-TABLE`, `GOODS-LIST`, `GOODS-PRICES-LIST` | Display screen, handle menu (buy/sell/refuel/navigate), validate input |
+| `END-SCREEN` | `GAME-DATA` | Display win/lose/quit result |
 
-Navigation logic (fuel, move, prices, win check) is handled inside port-screen. game.cbl only loops and handles quit.
+Navigation logic (fuel check, port move, visited marking, price fluctuation, win check) lives inside `PORT-SCREEN`. `game.cbl` only loops and intercepts quit.
 
----
-**Legacy** — Archived banking architecture at [LegacyArchitecture.md](legacy/LegacyArchitecture.md).
+## Design principles
+
+- **Single executable**: all modules compiled together via `cobc -x game.cbl mod1.cbl ...`
+- **No data files in RUN 1**: state is purely in-memory
+- **`cls` screen clears**: both `port-screen.cbl` and `end-screen.cbl` call `CALL "SYSTEM" USING "cls"` for readability
+
+## Legacy
+
+Archived banking architecture at [legacy/LegacyArchitecture.md](legacy/LegacyArchitecture.md).
