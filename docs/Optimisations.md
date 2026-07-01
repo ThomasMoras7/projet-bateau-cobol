@@ -67,4 +67,7 @@ The workspace variable `WS-CLS-COMMAND` (PIC X(03) `"cls"`) is declared only to 
 
 ### SIM-3 — Stray build artifacts and data files in project root 🟡
 
-Compilation produces `.o`/`.obj` files in `src/`, and runtime creates `.DAT` files at the project root. These clutter the workspace and risk accidental commits. Build output should go to `bin/` (already `.gitignore`d), and `.DAT` files should be created in a dedicated `data/` directory.
+Compilation was producing `.o` files in the project root, and runtime creates `.DAT` files at the
+project root. These clutter the workspace and risk accidental commits.
+
+**Applied**: `.o` files now compile to `bin/` (build script updated), `.gitignore` covers `*.o` and `*.dat`. Remaining concern: `.DAT` files still appear at root rather than a dedicated `data/` directory (for RUN 2+).
