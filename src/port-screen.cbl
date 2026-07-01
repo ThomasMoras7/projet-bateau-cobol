@@ -54,13 +54,17 @@
                WHEN 0
                    MOVE "Placeholder: quitter"
                        TO WS-NOTIFICATION
-               WHEN 1
-                   IF WS-FUEL-FLAG = 1
-                       PERFORM PROCESS-NAVIGATION
-                   ELSE
-                       MOVE "Faites le plein d'abord !"
-                           TO WS-NOTIFICATION
-                   END-IF
+                WHEN 1
+                    IF WS-FUEL-FLAG = 1
+                        PERFORM PROCESS-NAVIGATION
+                    ELSE
+                        IF WS-MONEY >= 50000
+                            MOVE "Faites le plein d'abord !"
+                                TO WS-NOTIFICATION
+                        ELSE
+                            MOVE "LOST" TO WS-STATUS
+                        END-IF
+                    END-IF
                 WHEN 2
                     PERFORM BUY-GOODS
                 WHEN 3
