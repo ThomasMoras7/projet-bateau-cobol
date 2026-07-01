@@ -1,0 +1,8 @@
+       01 WS-GAME-DATA.
+           05 WS-MONEY          PIC S9(10)V99.
+           05 WS-CURRENT-PORT   PIC 9(10).
+           05 WS-VISITED-PORTS-COUNT    PIC 9(10).
+           05 WS-STATUS         PIC X(10).
+           05 WS-FUEL-FLAG      PIC 9(01).
+           05 WS-NOTIFICATION   PIC X(60).
+           05 WS-CARGO-QUANTITY PIC 9(10) OCCURS 5.

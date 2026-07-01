@@ -1,46 +1,30 @@
-# COBOL Development Environment (Portable)
+# Projet Bateau
 
-This environment is pre-configured with **GnuCOBOL 3.2.0** (Community Build) for Windows.
+A turn-based maritime shipping game in **COBOL** (GnuCOBOL 3.2.0). Buy low, sell high, don't run out of fuel.
 
-## 📁 Project Structure
-
-- `gnu-cobol/`: Portable compiler binaries, libraries, and includes.
-
-- `setup_env.ps1`: PowerShell script to initialize the environment in the current terminal session.
-- `src/`: Directory for COBOL source files.
-- `src/hello.cbl`: Simple Hello World source file.
-
-
-## 🚀 How to Use
-
-### 1. Initialize the Environment
-Before compiling or running any COBOL program, you **must** run the setup script in your PowerShell terminal to add the compiler to your PATH and set required variables:
+## Quick Start
 
 ```powershell
-./setup_env.ps1
+.\build-game.ps1
+cd bin
+.\boat-game.exe
 ```
 
-### 2. Compile a Program
-To compile `src/hello.cbl` into an executable:
+## RUN 1 — Navigation Prologue
 
-```powershell
-cobc -x src/hello.cbl
-```
+- Visit 5 ports across the world
+- Trade 5 types of goods with dynamic pricing
+- Lose if you can't afford fuel for the next journey
 
-- `-x`: Builds an executable (instead of a shared object).
-- `-free`: (Optional) If you use free format instead of fixed format.
+## Roadmap
 
-### 3. Run the Program
-```powershell
-./hello.exe
-```
+| RUN | Theme | Status |
+|-----|-------|--------|
+| 1 | Navigation | In progress |
+| 2 | Commerce + saves | Up next |
+| 3 | Fleet + shipyard | Planned |
+| 4 | Full integration | Planned |
 
-## 🛠 Recommended VS Code Extensions
+## Docs
 
-For a clean and productive experience, install these extensions from the VS Code Marketplace:
-
-1.  **[COBOL](https://marketplace.visualstudio.com/items?itemName=bitlang.cobol)** (by bitlang): Syntax highlighting, snippets, and basic linting.
-2.  **[COBOL Language Support](https://marketplace.visualstudio.com/items?itemName=broadcom.cobol-language-support)** (by Broadcom): Advanced features like go-to-definition and linting.
-
-## 📝 Configuration Note
-This setup was manually extracted and localized in `cobol-workspace`. The `setup_env.ps1` script dynamically detects its location, making it truly portable.
+Full wiki → [docs/Index.md](docs/Index.md)

@@ -1,0 +1,5 @@
+       01 WS-GOODS-LIST.
+           05 WS-GOOD OCCURS 5.
+               10 WS-GOOD-ID        PIC 9(10).
+               10 WS-GOOD-NAME      PIC X(20).
+               10 WS-GOOD-BASE-PRICE PIC 9(10)V99.

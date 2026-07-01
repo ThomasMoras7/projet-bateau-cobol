@@ -1,0 +1,6 @@
+       01 WS-PORT-TABLE.
+           05 WS-PORT-ENTRY OCCURS 5.
+               10 WS-PORT-ID          PIC 9(10).
+               10 WS-PORT-NAME        PIC X(20).
+               10 WS-PORT-DESCRIPTION PIC X(60).
+               10 WS-PORT-VISITED     PIC X(01).

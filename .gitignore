@@ -7,5 +7,9 @@
 # Local Build artifacts
 *.exe
 *.obj
+*.o
+
+# Runtime data files
+*.dat
 
 gnu-cobol/**
