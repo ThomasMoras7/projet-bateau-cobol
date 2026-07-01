@@ -64,3 +64,7 @@ The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Plac
 ### SIM-2 — WS-CLS-COMMAND variable unnecessary 🟢
 
 The workspace variable `WS-CLS-COMMAND` (PIC X(03) `"cls"`) is declared only to be passed to `CALL "SYSTEM"`. The literal `"cls"` can be inlined directly in the `CALL` statement, removing the variable.
+
+### SIM-3 — Stray build artifacts and data files in project root 🟡
+
+Compilation produces `.o`/`.obj` files in `src/`, and runtime creates `.DAT` files at the project root. These clutter the workspace and risk accidental commits. Build output should go to `bin/` (already `.gitignore`d), and `.DAT` files should be created in a dedicated `data/` directory.
