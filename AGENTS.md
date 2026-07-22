@@ -21,6 +21,7 @@ cd bin; .\boat-game.exe  # Run
 **Exception**: `WS-I`, `WS-J`, etc. are acceptable for loop iteration indices only (convention). Temporary/computation variables still need full semantic names.
 - **Copybook 1:1 rule** — each copybook contains exactly one `01` level. Never put multiple structures in the same copybook (exception: copybook filename may use mild abbreviation to stay ≤ 8 chars). Suffix convention: `-rec` for records, `-dat` for data tables.
 - **Copybook names ≤ 8 characters** (GnuCOBOL fixed-format limit).
+- **JCL samples** in `docs/jcl/`. `.jcl` files — mainframe JCL for portfolio (not executable on this machine).
 - **`.gitignore`**: `*.exe`, `*.obj`, `gnu-cobol/**` excluded.
 - **Architecture**: Main program `game.cbl` + CALLed subprograms (`initialisation.cbl`, `port-screen.cbl`, `end-screen.cbl`), compiled together into one executable. **Open question**: subprograms may be merged into a single file depending on complexity.
 - **No `.DAT` files in RUN 1** — state is purely in-memory.
