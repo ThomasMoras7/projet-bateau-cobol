@@ -3,7 +3,7 @@
 # game
 
 ## Overview
-Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), then loops [`PORT-SCREEN`](API-PortScreen.md) until the game ends, then calls [`END-SCREEN`](API-EndScreen.md).
+Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), optionally loads a saved game, then loops [`PORT-SCREEN`](API-PortScreen.md) until the game ends, then calls [`END-SCREEN`](API-EndScreen.md). Owns the save/load file I/O.
 
 ## Sommaire
 
@@ -23,24 +23,47 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), the
 | [`gds-dat`](../data/gds-dat.md) | IN (passed through to subprograms) | Good names, base prices |
 | [`pric-dat`](../data/pric-dat.md) | IN (passed through to subprograms) | 5×5 price grid |
 
+### Files
+
+| File | Organization | Copybook | Usage |
+|------|--------------|----------|-------|
+| `data/GAME1.DAT` … `GAME5.DAT` | Sequential | [`save-dat`](../data/save-dat.md) | Save slots, one record per slot |
+
 ### Workspace
 
 | Variable | Level | Type | Usage |
 |----------|-------|------|-------|
 | `WS-ACTION` | 01 | PIC 9(01) | Menu choice forwarded to PORT-SCREEN |
 | `WS-ARG` | 01 | PIC 9(10) | Argument forwarded to PORT-SCREEN |
+| `WS-SAVE-FILE-STATUS` | 01 | PIC XX | File status of the save file |
+| `WS-SLOT-NUMBER` | 01 | PIC 9(01) | Currently selected slot (1-5) |
+| `WS-FILE-NAME` | 01 | PIC X(30) | Built slot filename (`data/GAMEx.DAT`) |
+| `WS-LOAD-CHOICE` | 01 | PIC 9(01) | Startup choice: load (1) or new game (0) |
+| `WS-EXISTING-SAVE-FOUND` | 01 | PIC 9(01) | Whether any slot contains a save |
+| `WS-SLOT-INDEX` | 01 | PIC 9(10) | Loop index over the 5 slots |
+| `WS-PRICE-INDEX` | 01 | PIC 9(10) | Flattened price grid index `(port-1)×5+good` |
+| `WS-I`, `WS-J` | 01 | PIC 9(10) | Loop iteration indices |
 
 ## Flow
 
 1. Initialize game state and tables via [`INITIALISATION`](API-Initialisation.md).
-2. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices. If the player chooses to quit, the game status becomes QUIT.
-3. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
-4. Terminate.
+2. Scan slots 1-5 for existing saves. If one is found, ask the player whether to load and which slot; if yes, restore the saved state via `LOAD-GAME` (overwrites the mutable state set by initialization).
+3. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices.
+4. On quit, ask for a save slot (0 = no save) and write the current state via `SAVE-GAME`, then set the game status to QUIT.
+5. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
+6. Terminate.
 
 ## Error Handling
 
-No error handling — [`PORT-SCREEN`](API-PortScreen.md) validates all inputs internally. The main program only intercepts the quit action.
+| Condition | Behavior |
+|-----------|----------|
+| `WS-SAVE-FILE-STATUS = "35"` on load | Display "Slot vide." — the fresh initialized state stays active |
+| `WS-SAVE-FILE-STATUS` other than "00" on read | Display "Lecture impossible." and close the file |
+| `WS-EXISTING-SAVE-FOUND = 0` | No prompt — the game starts fresh from initialization |
 
 ## Rules
 
+- `INITIALISATION` always runs first: it provides the static tables (port names, goods) that are not stored in the save record. Loading only overwrites the mutable state.
+- The price grid is stored flattened (port-major) in `WS-SAVE-GOODS-PRICES(1..25)`.
 - Quit is the only action handled by the main program itself — all other actions (navigation, buy, sell, refuel, lose condition, win condition) are processed inside [`PORT-SCREEN`](API-PortScreen.md).
+- Saving opens the file with `OUTPUT` (create/overwrite), loading with `INPUT`. A slot is skipped without closing if the open fails.
