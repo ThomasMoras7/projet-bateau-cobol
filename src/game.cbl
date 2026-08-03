@@ -22,7 +22,7 @@
        01 WS-LOAD-CHOICE PIC 9(01).
        01 WS-SLOT-OCCUPIED PIC X(01) OCCURS 5.
        01 WS-SAVE-COUNT PIC 9(01).
-       01 WS-VALID-SLOT-CHOSEN PIC 9(01).
+        01 WS-VALID-SLOT-CHOSEN PIC 9(01).
        01 WS-SLOT-INDEX PIC 9(10).
        01 WS-PRICE-INDEX PIC 9(10).
        01 WS-I PIC 9(10).
@@ -49,7 +49,9 @@
                 *> If load, asks for slot
                 IF WS-LOAD-CHOICE = 1
                     PERFORM ASK-LOAD-SLOT
-                    PERFORM LOAD-GAME
+                    IF WS-VALID-SLOT-CHOSEN = 1
+                        PERFORM LOAD-GAME
+                    END-IF
                 END-IF
            END-IF
 
@@ -76,7 +78,9 @@
                     IF WS-SAVE-COUNT > 0
                         PERFORM DISPLAY-SAVE-LIST
                         PERFORM ASK-LOAD-SLOT
-                        PERFORM LOAD-GAME
+                        IF WS-VALID-SLOT-CHOSEN = 1
+                            PERFORM LOAD-GAME
+                        END-IF
                     ELSE
                         DISPLAY "Aucune sauvegarde disponible."
                     END-IF
@@ -130,38 +134,61 @@
            END-PERFORM
            .
 
-       ASK-LOAD-SLOT.
-            
-           MOVE 0 TO WS-VALID-SLOT-CHOSEN
-            
-           *> Gets valid answer
-           PERFORM UNTIL WS-VALID-SLOT-CHOSEN = 1
-                DISPLAY "Numero de slot (1-5): " WITH NO ADVANCING
+        ASK-LOAD-SLOT.
+            MOVE 0 TO WS-VALID-SLOT-CHOSEN
+
+           *> Gets valid answer, 0 to cancel
+           PERFORM UNTIL WS-VALID-SLOT-CHOSEN NOT = 0
+                DISPLAY "Numero de slot (1-5) ou 0 pour annuler: "
+                    WITH NO ADVANCING
                 ACCEPT WS-SLOT-NUMBER
-                
-                *> Validates answer and slot
-                IF WS-SLOT-NUMBER < 1 OR WS-SLOT-NUMBER > 5
-                    DISPLAY "Slot invalide."
+
+                *> if cancel, validates answer but not slot
+                IF WS-SLOT-NUMBER = 0
+                    MOVE 2 TO WS-VALID-SLOT-CHOSEN
+                *> else, validates answer and slot
                 ELSE
-                    IF WS-SLOT-OCCUPIED(WS-SLOT-NUMBER) = '1'
-                        MOVE 1 TO WS-VALID-SLOT-CHOSEN
+                    IF WS-SLOT-NUMBER < 1 OR WS-SLOT-NUMBER > 5
+                        DISPLAY "Slot invalide."
                     ELSE
-                        DISPLAY "Ce slot est vide."
+                        IF WS-SLOT-OCCUPIED(WS-SLOT-NUMBER) = '1'
+                            MOVE 1 TO WS-VALID-SLOT-CHOSEN
+                        ELSE
+                            DISPLAY "Ce slot est vide."
+                        END-IF
                     END-IF
                 END-IF
            END-PERFORM
            .
 
-        ASK-SAVE-SLOT.
-            DISPLAY "Slot (1-5) ou 0 pour annuler: "
-                WITH NO ADVANCING
-            ACCEPT WS-SLOT-NUMBER
-            IF WS-SLOT-NUMBER >= 1 AND WS-SLOT-NUMBER <= 5
-                PERFORM SAVE-GAME
-            END-IF
-            .
+       ASK-SAVE-SLOT.
+           MOVE 0 TO WS-VALID-SLOT-CHOSEN
 
-        BUILD-FILE-NAME.
+           *> Gets valid answer, 0 to cancel
+           PERFORM UNTIL WS-VALID-SLOT-CHOSEN NOT = 0
+                DISPLAY "Slot (1-5) ou 0 pour annuler: "
+                    WITH NO ADVANCING
+                ACCEPT WS-SLOT-NUMBER
+
+                *> If cancel, validates answer but not slot
+                IF WS-SLOT-NUMBER = 0
+                    MOVE 2 TO WS-VALID-SLOT-CHOSEN
+                *> Else, validates answer and slot
+                ELSE
+                    IF WS-SLOT-NUMBER < 1 OR WS-SLOT-NUMBER > 5
+                        DISPLAY "Slot invalide."
+                    ELSE
+                        MOVE 1 TO WS-VALID-SLOT-CHOSEN
+                    END-IF
+                END-IF
+           END-PERFORM
+
+           IF WS-VALID-SLOT-CHOSEN = 1
+                PERFORM SAVE-GAME
+           END-IF
+           .
+
+       BUILD-FILE-NAME.
            STRING "data/GAME" WS-SLOT-NUMBER ".DAT"
                DELIMITED BY SIZE
                INTO WS-FILE-NAME
@@ -196,14 +223,14 @@
                END-PERFORM
            END-PERFORM
 
-            *> Writes save record
-            PERFORM BUILD-FILE-NAME
-            OPEN OUTPUT SAVE-FILE
+           *> Writes save record
+           PERFORM BUILD-FILE-NAME
+           OPEN OUTPUT SAVE-FILE
 
-            *> If file can't open, error
-            IF WS-SAVE-FILE-STATUS NOT = "00"
+           *> If file can't open, error
+           IF WS-SAVE-FILE-STATUS NOT = "00"
                 DISPLAY "Echec de l'ouverture du fichier."
-            ELSE
+           ELSE
                 WRITE WS-SAVE-RECORD
                 IF WS-SAVE-FILE-STATUS NOT = "00"
                     DISPLAY "Echec de l'ecriture de la sauvegarde."
@@ -212,8 +239,8 @@
                         WS-SLOT-NUMBER
                 END-IF
                 CLOSE SAVE-FILE
-            END-IF
-            .
+           END-IF
+           .
 
        LOAD-GAME.
            *> Opens save

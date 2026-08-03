@@ -42,7 +42,7 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 | `WS-LOAD-CHOICE` | 01 | PIC 9(01) | Startup choice: load (1) or new game (0) |
 | `WS-SLOT-OCCUPIED` | 01 | PIC X(01) OCCURS 5 | Per-slot occupied flag ('1' = has a save) |
 | `WS-SAVE-COUNT` | 01 | PIC 9(01) | Number of occupied slots |
-| `WS-VALID-SLOT-CHOSEN` | 01 | PIC 9(01) | Whether the chosen load slot is occupied |
+| `WS-VALID-SLOT-CHOSEN` | 01 | PIC 9(01) | Slot result: 1 = slot chosen, 2 = cancelled, 0 = still asking |
 | `WS-SLOT-INDEX` | 01 | PIC 9(10) | Loop index over the 5 slots |
 | `WS-PRICE-INDEX` | 01 | PIC 9(10) | Flattened price grid index `(port-1)×5+good` |
 | `WS-I`, `WS-J` | 01 | PIC 9(10) | Loop iteration indices |
@@ -72,11 +72,11 @@ Shows the occupied slots as a numbered list with the total count, then prompts f
 
 ### ASK-LOAD-SLOT
 
-Re-prompts until the player picks an occupied slot. A slot that was never occupied triggers `"Ce slot est vide."` and the prompt repeats. Handles status `"10"` (end-of-input) by re-prompting.
+Prompts until the player picks 0 (cancel) or an occupied slot 1-5. An out-of-range number displays `"Slot invalide."` and re-prompts; an empty slot displays `"Ce slot est vide."` and re-prompts. Cancelling (0) leaves `WS-VALID-SLOT-CHOSEN` at 2 so the caller skips `LOAD-GAME`; an occupied slot sets it to 1.
 
 ### ASK-SAVE-SLOT
 
-Re-prompts until the player picks 0 (cancel) or 1-5. Used both by menu option 5 and by the quit prompt.
+Prompts until the player picks 0 (cancel) or a slot 1-5. An out-of-range number displays `"Slot invalide."` and re-prompts. Cancelling (0) skips the save; a valid slot triggers `SAVE-GAME`. Used both by menu option 5 and by the quit prompt.
 
 ### BUILD-FILE-NAME
 
@@ -114,6 +114,7 @@ Copies the record read by `LOAD-GAME` back into the mutable game state (money, p
 | `WS-SAVE-FILE-STATUS` other than "00" on save write | Display "Echec de l'ecriture de la sauvegarde." and close the file |
 | `WS-SAVE-COUNT = 0` | No prompt — the game starts fresh from initialization |
 | Load requested but `WS-SAVE-COUNT = 0` | Display "Aucune sauvegarde disponible." and return to the menu |
+| Save or load prompt cancelled (0) | No file operation — current state stays |
 | Load slot chosen but not occupied | Display "Ce slot est vide." and re-prompt |
 
 ## Rules

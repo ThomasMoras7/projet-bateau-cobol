@@ -57,26 +57,6 @@ Price computation uses raw decimals (`0.5`, `0.9`, `0.2`) with no named constant
 
 Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2 externalised save data (sequential slot files), but the planned indexed `PORTS.DAT` was dropped — ports/goods stay hardcoded. A future RUN could load them from data files.
 
-### SIM-4 — ASK-LOAD-SLOT loops forever on empty/invalid input 🔴
+### SIM-4 — Startup load prompt is a hidden dependency for tests 🟡
 
-`ASK-LOAD-SLOT` (game.cbl) re-prompts on `"10"` (EOF) or invalid input without bounds. Combined with the startup load prompt, this hangs the automated test suite when stale save files are present: piped inputs get consumed by the prompt loop and the game never terminates. Mitigated in tests by `Clear-Saves`; a proper fix would bound the retries.
-
-### SIM-5 — Startup load prompt is a hidden dependency for tests 🟡
-
-The test suite only behaves when `data/` is empty at launch; any leftover save slot triggers the interactive load prompt. The dependency is undocumented in `test-game.ps1` headers.
-
----
-
-## Done
-
-### SIM-1 — Dead code in WS-ACTION 0 handler 🟢 (kept)
-
-The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Placeholder: quitter"`), never displayed because `game.cbl` catches `WS-ACTION = 0` and goes straight to `END-SCREEN`. **Decision**: line kept as-is at the user's request.
-
-### SIM-2 — WS-CLS-COMMAND variable unnecessary ✅
-
-`WS-CLS-COMMAND` removed; the literal `"cls"` is inlined directly in the `CALL "SYSTEM"` statement.
-
-### SIM-3 — Stray build artifacts and data files in project root ✅
-
-`.o` files compile to `bin/` and save files live in `data/GAME1.DAT` … `GAME5.DAT`; `.gitignore` covers `*.exe`, `*.obj`, `*.o`, `*.dat`, and `gnu-cobol/`.
+The test suite only behaves when `data/` is empty at launch; any leftover save slot triggers the interactive load prompt, which consumes piped test input. End-of-input is treated as cancel (0) by both slot prompts, so the run continues, but the dependency is undocumented in `test-game.ps1` headers and `Clear-Saves` is required.
