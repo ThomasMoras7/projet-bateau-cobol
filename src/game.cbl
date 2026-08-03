@@ -174,14 +174,24 @@
                END-PERFORM
            END-PERFORM
 
-           *> Writes save record
-           PERFORM BUILD-FILE-NAME
-           OPEN OUTPUT SAVE-FILE
-           WRITE WS-SAVE-RECORD
-           CLOSE SAVE-FILE
+            *> Writes save record
+            PERFORM BUILD-FILE-NAME
+            OPEN OUTPUT SAVE-FILE
 
-           DISPLAY "Sauvegarde effectuee dans le slot " WS-SLOT-NUMBER
-           .
+            *> If file can't open, error
+            IF WS-SAVE-FILE-STATUS NOT = "00"
+                DISPLAY "Echec de l'ouverture du fichier."
+            ELSE
+                WRITE WS-SAVE-RECORD
+                IF WS-SAVE-FILE-STATUS NOT = "00"
+                    DISPLAY "Echec de l'ecriture de la sauvegarde."
+                ELSE
+                    DISPLAY "Sauvegarde effectuee dans le slot "
+                        WS-SLOT-NUMBER
+                END-IF
+                CLOSE SAVE-FILE
+            END-IF
+            .
 
        LOAD-GAME.
            *> Opens save

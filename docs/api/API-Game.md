@@ -61,6 +61,8 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 |-----------|----------|
 | `WS-SAVE-FILE-STATUS = "35"` on load | Display "Slot vide." — the fresh initialized state stays active |
 | `WS-SAVE-FILE-STATUS` other than "00" on read | Display "Lecture impossible." and close the file |
+| `WS-SAVE-FILE-STATUS` other than "00" on save open | Display "Echec de l'ouverture du fichier." — the file is neither written nor closed |
+| `WS-SAVE-FILE-STATUS` other than "00" on save write | Display "Echec de l'ecriture de la sauvegarde." and close the file |
 | `WS-SAVE-COUNT = 0` | No prompt — the game starts fresh from initialization |
 | Load slot chosen but not occupied | Display "Ce slot est vide." and re-prompt |
 
