@@ -39,7 +39,9 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 | `WS-SLOT-NUMBER` | 01 | PIC 9(01) | Currently selected slot (1-5) |
 | `WS-FILE-NAME` | 01 | PIC X(30) | Built slot filename (`data/GAMEx.DAT`) |
 | `WS-LOAD-CHOICE` | 01 | PIC 9(01) | Startup choice: load (1) or new game (0) |
-| `WS-EXISTING-SAVE-FOUND` | 01 | PIC 9(01) | Whether any slot contains a save |
+| `WS-SLOT-OCCUPIED` | 01 | PIC X(01) OCCURS 5 | Per-slot occupied flag ('1' = has a save) |
+| `WS-SAVE-COUNT` | 01 | PIC 9(01) | Number of occupied slots |
+| `WS-VALID-SLOT-CHOSEN` | 01 | PIC 9(01) | Whether the chosen load slot is occupied |
 | `WS-SLOT-INDEX` | 01 | PIC 9(10) | Loop index over the 5 slots |
 | `WS-PRICE-INDEX` | 01 | PIC 9(10) | Flattened price grid index `(port-1)×5+good` |
 | `WS-I`, `WS-J` | 01 | PIC 9(10) | Loop iteration indices |
@@ -47,7 +49,7 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 ## Flow
 
 1. Initialize game state and tables via [`INITIALISATION`](API-Initialisation.md).
-2. Scan slots 1-5 for existing saves. If one is found, ask the player whether to load and which slot; if yes, restore the saved state via `LOAD-GAME` (overwrites the mutable state set by initialization).
+2. Scan slots 1-5 and mark each occupied one. If any save exists, list the occupied slots and ask the player whether to load and which slot; if yes, restore the saved state via `LOAD-GAME` (overwrites the mutable state set by initialization). Only occupied slots are accepted.
 3. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices.
 4. On quit, ask for a save slot (0 = no save) and write the current state via `SAVE-GAME`, then set the game status to QUIT.
 5. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
@@ -59,7 +61,8 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 |-----------|----------|
 | `WS-SAVE-FILE-STATUS = "35"` on load | Display "Slot vide." — the fresh initialized state stays active |
 | `WS-SAVE-FILE-STATUS` other than "00" on read | Display "Lecture impossible." and close the file |
-| `WS-EXISTING-SAVE-FOUND = 0` | No prompt — the game starts fresh from initialization |
+| `WS-SAVE-COUNT = 0` | No prompt — the game starts fresh from initialization |
+| Load slot chosen but not occupied | Display "Ce slot est vide." and re-prompt |
 
 ## Rules
 

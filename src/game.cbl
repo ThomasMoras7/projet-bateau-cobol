@@ -20,7 +20,9 @@
        01 WS-SLOT-NUMBER PIC 9(01).
        01 WS-FILE-NAME PIC X(30).
        01 WS-LOAD-CHOICE PIC 9(01).
-       01 WS-EXISTING-SAVE-FOUND PIC 9(01).
+       01 WS-SLOT-OCCUPIED PIC X(01) OCCURS 5.
+       01 WS-SAVE-COUNT PIC 9(01).
+       01 WS-VALID-SLOT-CHOSEN PIC 9(01).
        01 WS-SLOT-INDEX PIC 9(10).
        01 WS-PRICE-INDEX PIC 9(10).
        01 WS-I PIC 9(10).
@@ -35,20 +37,20 @@
            CALL "INITIALISATION" USING WS-GAME-DATA WS-PORT-TABLE
                WS-GOODS-LIST WS-GOODS-PRICES-LIST
 
-           PERFORM CHECK-EXISTING-SAVES
+            PERFORM CHECK-EXISTING-SAVES
 
-           *> If save found, asks for load or new game
-           IF WS-EXISTING-SAVE-FOUND = 1
-               
-               DISPLAY "Une partie sauvegardee a ete trouvee."
-               DISPLAY "Charger la partie (1) ou nouvelle partie (0) ? "
-               ACCEPT WS-LOAD-CHOICE
-               
-               *> If load, asks for slot
-               IF WS-LOAD-CHOICE = 1
-                   PERFORM ASK-SLOT-NUMBER
-                   PERFORM LOAD-GAME
-               END-IF
+            *> If save found, asks for load or new game
+           IF WS-SAVE-COUNT > 0
+                PERFORM DISPLAY-SAVE-LIST
+
+                DISPLAY "Charger (1) ou nouvelle partie (0) ? "
+                ACCEPT WS-LOAD-CHOICE
+                
+                *> If load, asks for slot
+                IF WS-LOAD-CHOICE = 1
+                    PERFORM ASK-LOAD-SLOT
+                    PERFORM LOAD-GAME
+                END-IF
            END-IF
 
            PERFORM UNTIL WS-STATUS NOT = "PLAYING"
@@ -73,39 +75,67 @@
 
            STOP RUN.
 
-       CHECK-EXISTING-SAVES.
-           
-           MOVE 0 TO WS-EXISTING-SAVE-FOUND
-           
-           *> Scans every 5 slots
+        CHECK-EXISTING-SAVES.
+            
+           MOVE 0 TO WS-SAVE-COUNT
+            
+            *> Scans every 5 slots
+            PERFORM VARYING WS-SLOT-INDEX FROM 1 BY 1
+                    UNTIL WS-SLOT-INDEX > 5
+                
+                MOVE '0' TO WS-SLOT-OCCUPIED(WS-SLOT-INDEX)
+                
+                *> Attemps opening file
+                MOVE WS-SLOT-INDEX TO WS-SLOT-NUMBER
+                PERFORM BUILD-FILE-NAME
+                OPEN INPUT SAVE-FILE
+                
+                *> If file opens, add to found saves
+                IF WS-SAVE-FILE-STATUS = "00"
+                    MOVE '1' TO WS-SLOT-OCCUPIED(WS-SLOT-INDEX)
+                    ADD 1 TO WS-SAVE-COUNT
+                    CLOSE SAVE-FILE
+                END-IF
+
+            END-PERFORM
+            .
+
+        DISPLAY-SAVE-LIST.
+
+           DISPLAY "Parties sauvegardees:"
+
+           *> Displays each occupied save slot
            PERFORM VARYING WS-SLOT-INDEX FROM 1 BY 1
-                   UNTIL WS-SLOT-INDEX > 5
-               
-               *> Attemps opening file
-               MOVE WS-SLOT-INDEX TO WS-SLOT-NUMBER
-               PERFORM BUILD-FILE-NAME
-               OPEN INPUT SAVE-FILE
-               
-               *> If file opens, save found
-               IF WS-SAVE-FILE-STATUS = "00"
-                   MOVE 1 TO WS-EXISTING-SAVE-FOUND
-                   CLOSE SAVE-FILE
-               END-IF
+                    UNTIL WS-SLOT-INDEX > 5
+                
+                *> If occupied, displays slot
+                IF WS-SLOT-OCCUPIED(WS-SLOT-INDEX) = '1'
+                    MOVE WS-SLOT-INDEX TO WS-SLOT-NUMBER
+                    DISPLAY "  Slot " WS-SLOT-NUMBER
+                END-IF
 
            END-PERFORM
            .
 
-       ASK-SLOT-NUMBER.
-           
-           MOVE 0 TO WS-SLOT-NUMBER
-           
-           *> Validates answer
-           PERFORM UNTIL WS-SLOT-NUMBER >= 1 AND WS-SLOT-NUMBER <= 5
-               DISPLAY "Numero de slot (1-5): " WITH NO ADVANCING
-               ACCEPT WS-SLOT-NUMBER
-               IF WS-SLOT-NUMBER < 1 OR WS-SLOT-NUMBER > 5
-                   DISPLAY "Slot invalide."
-               END-IF
+       ASK-LOAD-SLOT.
+            
+           MOVE 0 TO WS-VALID-SLOT-CHOSEN
+            
+           *> Gets valid answer
+           PERFORM UNTIL WS-VALID-SLOT-CHOSEN = 1
+                DISPLAY "Numero de slot (1-5): " WITH NO ADVANCING
+                ACCEPT WS-SLOT-NUMBER
+                
+                *> Validates answer and slot
+                IF WS-SLOT-NUMBER < 1 OR WS-SLOT-NUMBER > 5
+                    DISPLAY "Slot invalide."
+                ELSE
+                    IF WS-SLOT-OCCUPIED(WS-SLOT-NUMBER) = '1'
+                        MOVE 1 TO WS-VALID-SLOT-CHOSEN
+                    ELSE
+                        DISPLAY "Ce slot est vide."
+                    END-IF
+                END-IF
            END-PERFORM
            .
 
