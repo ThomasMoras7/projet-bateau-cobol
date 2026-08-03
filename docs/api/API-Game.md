@@ -8,6 +8,7 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 ## Sommaire
 
 - [Data](#data)
+- [Procedure](#procedure)
 - [Flow](#flow)
 - [Error Handling](#error-handling)
 - [Rules](#rules)
@@ -45,6 +46,53 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 | `WS-SLOT-INDEX` | 01 | PIC 9(10) | Loop index over the 5 slots |
 | `WS-PRICE-INDEX` | 01 | PIC 9(10) | Flattened price grid index `(port-1)×5+good` |
 | `WS-I`, `WS-J` | 01 | PIC 9(10) | Loop iteration indices |
+
+## Procedure
+
+Nine paragraphs, executed from the main flow:
+
+| Paragraph | Role | Arguments |
+|-----------|------|-----------|
+| `CHECK-EXISTING-SAVES` | Open each slot (INPUT), mark occupied, close; count occupied slots | none |
+| `DISPLAY-SAVE-LIST` | Print occupied slot numbers and save count | none |
+| `ASK-LOAD-SLOT` | Prompt for a slot to load, re-prompt until occupied or valid | none |
+| `ASK-SAVE-SLOT` | Prompt for a slot to save (0 = cancel), re-prompt until 0-5 | none |
+| `BUILD-FILE-NAME` | Build `WS-FILE-NAME` for the selected slot number | `WS-SLOT-NUMBER` |
+| `SAVE-GAME` | Open slot file (OUTPUT), write state record, close | `WS-FILE-NAME` |
+| `LOAD-GAME` | Open slot file (INPUT), read record, close | `WS-FILE-NAME` |
+| `RESTORE-STATE` | Copy the read record back into the mutable state | none |
+
+### CHECK-EXISTING-SAVES
+
+Attempts to open each slot 1-5 in `INPUT` mode. An open returning status `"35"` (file-not-found) means the slot is empty; any successful open marks the slot occupied and immediately closes it. Runs right after initialization so the startup flow knows whether to offer a load.
+
+### DISPLAY-SAVE-LIST
+
+Shows the occupied slots as a numbered list with the total count, then prompts for a load choice. Called at startup and from menu option 6.
+
+### ASK-LOAD-SLOT
+
+Re-prompts until the player picks an occupied slot. A slot that was never occupied triggers `"Ce slot est vide."` and the prompt repeats. Handles status `"10"` (end-of-input) by re-prompting.
+
+### ASK-SAVE-SLOT
+
+Re-prompts until the player picks 0 (cancel) or 1-5. Used both by menu option 5 and by the quit prompt.
+
+### BUILD-FILE-NAME
+
+Builds `data/GAMEx.DAT` from the slot number. Uses the full form `data/GAME1.DAT` … `data/GAME5.DAT`.
+
+### SAVE-GAME
+
+Opens the slot file with `OUTPUT` (create/overwrite), writes one `save-dat` record, closes. On open failure the file is neither written nor closed.
+
+### LOAD-GAME
+
+Opens the slot file with `INPUT`, reads the single record, closes. On open failure (`"35"`) the fresh initialized state stays active.
+
+### RESTORE-STATE
+
+Copies the record read by `LOAD-GAME` back into the mutable game state (money, port, fuel, cargo, visited flags, price grid).
 
 ## Flow
 

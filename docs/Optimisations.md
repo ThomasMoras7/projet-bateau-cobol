@@ -15,7 +15,7 @@
 
 ### OPT-1 — Deterministic WIN test 🟡
 
-The adaptive WIN test (`Test-Win-Adaptive`) is probabilistic because `FUNCTION RANDOM` accepts no documented seed. Prices differ every run, so victory is not guaranteed (practical success rate ~1-5 attempts, but unbounded in theory).
+The adaptive WIN test (`Test-Win-Adaptive`) is probabilistic because `FUNCTION RANDOM` accepts no documented seed. Prices differ every run, so victory is not guaranteed (practical success rate: 4 to 62 attempts observed, but unbounded in theory).
 
 Solutions:
 - **Option A** — Test mode via env variable: if `TEST_MODE=1`, skip `FUNCTION RANDOM` in `initialisation.cbl` and use fixed profitable prices.
@@ -55,19 +55,28 @@ Price computation uses raw decimals (`0.5`, `0.9`, `0.2`) with no named constant
 
 ### EXT-4 — Goods and ports data hardcoded 🟢
 
-Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2+ should load them from data files.
+Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2 externalised save data (sequential slot files), but the planned indexed `PORTS.DAT` was dropped — ports/goods stay hardcoded. A future RUN could load them from data files.
 
-### SIM-1 — Dead code in WS-ACTION 0 handler 🟡
+### SIM-4 — ASK-LOAD-SLOT loops forever on empty/invalid input 🔴
 
-The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Placeholder: quitter"`). This notification is never displayed — `game.cbl` immediately catches `WS-ACTION = 0`, sets status to `"QUIT"`, and calls `END-SCREEN` directly. The notification assignment is unreachable dead code.
+`ASK-LOAD-SLOT` (game.cbl) re-prompts on `"10"` (EOF) or invalid input without bounds. Combined with the startup load prompt, this hangs the automated test suite when stale save files are present: piped inputs get consumed by the prompt loop and the game never terminates. Mitigated in tests by `Clear-Saves`; a proper fix would bound the retries.
 
-### SIM-2 — WS-CLS-COMMAND variable unnecessary 🟢
+### SIM-5 — Startup load prompt is a hidden dependency for tests 🟡
 
-The workspace variable `WS-CLS-COMMAND` (PIC X(03) `"cls"`) is declared only to be passed to `CALL "SYSTEM"`. The literal `"cls"` can be inlined directly in the `CALL` statement, removing the variable.
+The test suite only behaves when `data/` is empty at launch; any leftover save slot triggers the interactive load prompt. The dependency is undocumented in `test-game.ps1` headers.
 
-### SIM-3 — Stray build artifacts and data files in project root 🟡
+---
 
-Compilation was producing `.o` files in the project root, and runtime creates `.DAT` files at the
-project root. These clutter the workspace and risk accidental commits.
+## Done
 
-**Applied**: `.o` files now compile to `bin/` (build script updated), `.gitignore` covers `*.o` and `*.dat`. Remaining concern: `.DAT` files still appear at root rather than a dedicated `data/` directory (for RUN 2+).
+### SIM-1 — Dead code in WS-ACTION 0 handler 🟢 (kept)
+
+The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Placeholder: quitter"`), never displayed because `game.cbl` catches `WS-ACTION = 0` and goes straight to `END-SCREEN`. **Decision**: line kept as-is at the user's request.
+
+### SIM-2 — WS-CLS-COMMAND variable unnecessary ✅
+
+`WS-CLS-COMMAND` removed; the literal `"cls"` is inlined directly in the `CALL "SYSTEM"` statement.
+
+### SIM-3 — Stray build artifacts and data files in project root ✅
+
+`.o` files compile to `bin/` and save files live in `data/GAME1.DAT` … `GAME5.DAT`; `.gitignore` covers `*.exe`, `*.obj`, `*.o`, `*.dat`, and `gnu-cobol/`.

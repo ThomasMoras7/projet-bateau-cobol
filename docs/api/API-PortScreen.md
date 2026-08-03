@@ -42,7 +42,6 @@ Handles all port interaction: display, menu, buy/sell/refuel/navigate. Called in
 | `WS-PRICE` | 01 | PIC 9(10) | Computed total price during buy/sell |
 | `WS-EXIT-FLAG` | 01 | PIC 9(01) | Input validation loop flag |
 | `WS-QUANTITY` | 01 | PIC 9(10) | Quantity for buy/sell |
-| `WS-CLS-COMMAND` | 01 | PIC X(03) | `"cls"` for `CALL "SYSTEM"` (screen clear) |
 
 ## Procedure
 
