@@ -98,7 +98,7 @@ For every port-good pair, the current price is multiplied by a random factor bet
 ### Main
 
 1. Clear the screen and render the current port (name, description, money, fuel level).
-2. Show the menu: Navigate, Buy, Sell, Refuel.
+2. Show the menu: Navigate, Buy, Sell, Refuel, Save, Load.
 3. If a pending notification exists, display it.
 4. Read the player's choice.
 5. Dispatch to the corresponding handler, or show an error for invalid choices.
@@ -123,6 +123,7 @@ For every port-good pair, the current price is multiplied by a random factor bet
 
 ## Rules
 
+- Menu options 5 (Save) and 6 (Load) are not processed here — `WS-ACTION` keeps their value and is returned to the caller, which performs the file I/O. All other valid choices are dispatched to the matching handler.
 - Navigation requires a full tank. The cost is the refuel (50000), not the journey itself.
 - Origin port is NOT pre-marked visited — must revisit it to reach win condition.
 - Notifications are one-shot: set during an action, displayed once on the next screen, then cleared.

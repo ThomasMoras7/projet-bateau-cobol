@@ -51,9 +51,10 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 1. Initialize game state and tables via [`INITIALISATION`](API-Initialisation.md).
 2. Scan slots 1-5 and mark each occupied one. If any save exists, list the occupied slots and ask the player whether to load and which slot; if yes, restore the saved state via `LOAD-GAME` (overwrites the mutable state set by initialization). Only occupied slots are accepted.
 3. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices.
-4. On quit, ask for a save slot (0 = no save) and write the current state via `SAVE-GAME`, then set the game status to QUIT.
-5. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
-6. Terminate.
+4. Menu option 5 (Save) prompts for a slot (0 = cancel) via `ASK-SAVE-SLOT` and writes the state via `SAVE-GAME`. Menu option 6 (Load) re-scans the slots, lists the occupied ones, asks which slot to restore, and loads it via `LOAD-GAME`; if no save exists it shows "Aucune sauvegarde disponible." and returns to the menu.
+5. On quit, the player is asked whether to save; `ASK-SAVE-SLOT` prompts for a slot (0 = no save) and `SAVE-GAME` writes the state, then the game status is set to QUIT.
+6. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
+7. Terminate.
 
 ## Error Handling
 
@@ -64,6 +65,7 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), opt
 | `WS-SAVE-FILE-STATUS` other than "00" on save open | Display "Echec de l'ouverture du fichier." — the file is neither written nor closed |
 | `WS-SAVE-FILE-STATUS` other than "00" on save write | Display "Echec de l'ecriture de la sauvegarde." and close the file |
 | `WS-SAVE-COUNT = 0` | No prompt — the game starts fresh from initialization |
+| Load requested but `WS-SAVE-COUNT = 0` | Display "Aucune sauvegarde disponible." and return to the menu |
 | Load slot chosen but not occupied | Display "Ce slot est vide." and re-prompt |
 
 ## Rules

@@ -39,8 +39,10 @@
            DISPLAY "1 - Naviguer"
            DISPLAY "2 - Acheter"
            DISPLAY "3 - Vendre"
-           DISPLAY "4 - Remplir l'essence (50 000$)"
-           DISPLAY " "
+            DISPLAY "4 - Remplir l'essence (50 000$)"
+            DISPLAY "5 - Sauvegarder"
+            DISPLAY "6 - Charger"
+            DISPLAY " "
            IF WS-NOTIFICATION NOT = SPACES
                DISPLAY "----------------------------------------"
                DISPLAY WS-NOTIFICATION
@@ -69,22 +71,26 @@
                     PERFORM BUY-GOODS
                 WHEN 3
                     PERFORM SELL-GOODS
-               WHEN 4
-                   IF WS-FUEL-FLAG = 1
-                       MOVE "Plein deja fait !"
-                           TO WS-NOTIFICATION
-                   ELSE
-                       IF WS-MONEY >= 50000
-                           SUBTRACT 50000 FROM WS-MONEY
-                           MOVE 1 TO WS-FUEL-FLAG
-                           MOVE "Plein fait !"
-                               TO WS-NOTIFICATION
-                       ELSE
-                           MOVE "Pas assez d'argent !"
-                               TO WS-NOTIFICATION
-                       END-IF
-                   END-IF
-               WHEN OTHER
+                WHEN 4
+                    IF WS-FUEL-FLAG = 1
+                        MOVE "Plein deja fait !"
+                            TO WS-NOTIFICATION
+                    ELSE
+                        IF WS-MONEY >= 50000
+                            SUBTRACT 50000 FROM WS-MONEY
+                            MOVE 1 TO WS-FUEL-FLAG
+                            MOVE "Plein fait !"
+                                TO WS-NOTIFICATION
+                        ELSE
+                            MOVE "Pas assez d'argent !"
+                                TO WS-NOTIFICATION
+                        END-IF
+                    END-IF
+                WHEN 5
+                    CONTINUE
+                WHEN 6
+                    CONTINUE
+                WHEN OTHER
                    MOVE "Choix invalide."
                        TO WS-NOTIFICATION
            END-EVALUATE

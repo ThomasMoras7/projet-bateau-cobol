@@ -58,16 +58,29 @@
                CALL "PORT-SCREEN" USING WS-ACTION WS-ARG WS-GAME-DATA
                    WS-PORT-TABLE WS-GOODS-LIST WS-GOODS-PRICES-LIST
 
-               *> if quit, asks for save
-               IF WS-ACTION = 0
-                   DISPLAY "Sauvegarder avant de quitter ?"
-                   DISPLAY "Slot (1-5) ou 0 pour ne pas sauvegarder: "
-                   ACCEPT WS-SLOT-NUMBER
-                   IF WS-SLOT-NUMBER >= 1 AND WS-SLOT-NUMBER <= 5
-                       PERFORM SAVE-GAME
-                   END-IF
-                   MOVE "QUIT" TO WS-STATUS
-               END-IF
+                *> if quit, asks for save
+                IF WS-ACTION = 0
+                    DISPLAY "Sauvegarder avant de quitter ?"
+                    PERFORM ASK-SAVE-SLOT
+                    MOVE "QUIT" TO WS-STATUS
+                END-IF
+
+                *> if save, asks for slot
+                IF WS-ACTION = 5
+                    PERFORM ASK-SAVE-SLOT
+                END-IF
+
+                *> if load, checks saves and loads
+                IF WS-ACTION = 6
+                    PERFORM CHECK-EXISTING-SAVES
+                    IF WS-SAVE-COUNT > 0
+                        PERFORM DISPLAY-SAVE-LIST
+                        PERFORM ASK-LOAD-SLOT
+                        PERFORM LOAD-GAME
+                    ELSE
+                        DISPLAY "Aucune sauvegarde disponible."
+                    END-IF
+                END-IF
 
            END-PERFORM
 
@@ -139,7 +152,16 @@
            END-PERFORM
            .
 
-       BUILD-FILE-NAME.
+        ASK-SAVE-SLOT.
+            DISPLAY "Slot (1-5) ou 0 pour annuler: "
+                WITH NO ADVANCING
+            ACCEPT WS-SLOT-NUMBER
+            IF WS-SLOT-NUMBER >= 1 AND WS-SLOT-NUMBER <= 5
+                PERFORM SAVE-GAME
+            END-IF
+            .
+
+        BUILD-FILE-NAME.
            STRING "data/GAME" WS-SLOT-NUMBER ".DAT"
                DELIMITED BY SIZE
                INTO WS-FILE-NAME
