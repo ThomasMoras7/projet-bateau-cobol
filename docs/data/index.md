@@ -6,6 +6,7 @@
 - [`port-dat`](port-dat.md) — Port table (5 entries with name, description, visited)
 - [`gds-dat`](gds-dat.md) — Goods list (5 goods with name, base price)
 - [`pric-dat`](pric-dat.md) — Prices grid (5 ports × 5 goods)
+- [`save-dat`](save-dat.md) — Save record (money, port, fuel, cargo, visited flags, prices)
 - [Price algorithm](#price-algorithm)
 - [Display format](#display-format)
 

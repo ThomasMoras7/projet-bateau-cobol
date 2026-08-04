@@ -1,0 +1,9 @@
+       01 WS-SAVE-RECORD.
+           05 WS-SAVE-MONEY                PIC S9(10)V99.
+           05 WS-SAVE-CURRENT-PORT         PIC 9(10).
+           05 WS-SAVE-VISITED-PORTS-COUNT  PIC 9(10).
+           05 WS-SAVE-STATUS               PIC X(10).
+           05 WS-SAVE-FUEL-FLAG            PIC 9(01).
+           05 WS-SAVE-CARGO-QUANTITY       PIC 9(10) OCCURS 5.
+           05 WS-SAVE-PORT-VISITED         PIC X(01) OCCURS 5.
+           05 WS-SAVE-GOODS-PRICES         PIC 9(10)V99 OCCURS 25.

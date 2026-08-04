@@ -1,10 +1,12 @@
 # Projet Bateau — Wiki Index
 
-- [GameDesign](GameDesign.md)
+- [Game Design](GameDesign.md)
 - [Features](Features.md)
 - [Architecture](Architecture.md)
 - [Data structure](data/index.md)
-- [API](api/index.md)
+- [API — game](api/index.md)
+- [API — legacy banking](legacy/LegacyAPI.md)
 - [Optimisations](Optimisations.md)
+- [JCL](jcl/BUILDGAM.jcl)
 - [Changelog](Changelog.md)
 - [Legacy](legacy/LegacyIndex.md)

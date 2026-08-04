@@ -1,10 +1,10 @@
 [Index](Index.md) > Features
 
-# Features — RUN 1
+# Features
 
 ## Game Lifecycle
-- Fresh start on every run (no save/load)
-- No file I/O — everything in memory
+- Game starts by building the state and tables (ports, goods, prices) and scanning the 5 save slots (`data/GAME1.DAT` … `GAME5.DAT`)
+- If a save exists, the startup load prompt offers to resume a slot or start a new game
 - `cls` printed before both the port screen and the end screen for readability
 - One-shot notifications: after each action a message is queued, displayed once on the next screen, then cleared
 
@@ -32,6 +32,13 @@
 
 ## Starting Port
 - Game starts at port 1 (Shanghai).
+
+## Save / Load
+- 5 slots, one record each: `data/GAME1.DAT` … `GAME5.DAT` (sequential files)
+- Saved state: money, current port, fuel, cargo, visited ports, price grid
+- **Save**: menu option 5 (slot 1-5, 0 = cancel), or confirm at quit — overwrites the chosen slot
+- **Load**: menu option 6, or the startup prompt — only occupied slots are accepted
+- Loading restores the full mutable state; static tables (ports, goods) are rebuilt by `INITIALISATION`
 
 ## Win / Lose
 - **Win**: visit all 5 ports (count reaches 5)

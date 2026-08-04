@@ -15,7 +15,7 @@
 
 ### OPT-1 — Deterministic WIN test 🟡
 
-The adaptive WIN test (`Test-Win-Adaptive`) is probabilistic because `FUNCTION RANDOM` accepts no documented seed. Prices differ every run, so victory is not guaranteed (practical success rate ~1-5 attempts, but unbounded in theory).
+The adaptive WIN test (`Test-Win-Adaptive`) is probabilistic because `FUNCTION RANDOM` accepts no documented seed. Prices differ every run, so victory is not guaranteed (practical success rate: 4 to 62 attempts observed, but unbounded in theory).
 
 Solutions:
 - **Option A** — Test mode via env variable: if `TEST_MODE=1`, skip `FUNCTION RANDOM` in `initialisation.cbl` and use fixed profitable prices.
@@ -55,19 +55,8 @@ Price computation uses raw decimals (`0.5`, `0.9`, `0.2`) with no named constant
 
 ### EXT-4 — Goods and ports data hardcoded 🟢
 
-Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2+ should load them from data files.
+Goods (names, base prices) and ports (names, descriptions) are inline literals in `initialisation.cbl`. RUN 2 externalised save data (sequential slot files), but the planned indexed `PORTS.DAT` was dropped — ports/goods stay hardcoded. A future RUN could load them from data files.
 
-### SIM-1 — Dead code in WS-ACTION 0 handler 🟡
+### SIM-4 — Startup load prompt is a hidden dependency for tests 🟡
 
-The `WHEN 0` branch in `port-screen.cbl` sets a placeholder notification (`"Placeholder: quitter"`). This notification is never displayed — `game.cbl` immediately catches `WS-ACTION = 0`, sets status to `"QUIT"`, and calls `END-SCREEN` directly. The notification assignment is unreachable dead code.
-
-### SIM-2 — WS-CLS-COMMAND variable unnecessary 🟢
-
-The workspace variable `WS-CLS-COMMAND` (PIC X(03) `"cls"`) is declared only to be passed to `CALL "SYSTEM"`. The literal `"cls"` can be inlined directly in the `CALL` statement, removing the variable.
-
-### SIM-3 — Stray build artifacts and data files in project root 🟡
-
-Compilation was producing `.o` files in the project root, and runtime creates `.DAT` files at the
-project root. These clutter the workspace and risk accidental commits.
-
-**Applied**: `.o` files now compile to `bin/` (build script updated), `.gitignore` covers `*.o` and `*.dat`. Remaining concern: `.DAT` files still appear at root rather than a dedicated `data/` directory (for RUN 2+).
+The test suite only behaves when `data/` is empty at launch; any leftover save slot triggers the interactive load prompt, which consumes piped test input. End-of-input is treated as cancel (0) by both slot prompts, so the run continues, but the dependency is undocumented in `test-game.ps1` headers and `Clear-Saves` is required.

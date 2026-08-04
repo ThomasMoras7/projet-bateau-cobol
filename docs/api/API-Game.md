@@ -3,11 +3,12 @@
 # game
 
 ## Overview
-Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), then loops [`PORT-SCREEN`](API-PortScreen.md) until the game ends, then calls [`END-SCREEN`](API-EndScreen.md).
+Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), optionally loads a saved game, then loops [`PORT-SCREEN`](API-PortScreen.md) until the game ends, then calls [`END-SCREEN`](API-EndScreen.md). Owns the save/load file I/O.
 
 ## Sommaire
 
 - [Data](#data)
+- [Procedure](#procedure)
 - [Flow](#flow)
 - [Error Handling](#error-handling)
 - [Rules](#rules)
@@ -23,24 +24,102 @@ Main program — game loop. Calls [`INITIALISATION`](API-Initialisation.md), the
 | [`gds-dat`](../data/gds-dat.md) | IN (passed through to subprograms) | Good names, base prices |
 | [`pric-dat`](../data/pric-dat.md) | IN (passed through to subprograms) | 5×5 price grid |
 
+### Files
+
+| File | Organization | Copybook | Usage |
+|------|--------------|----------|-------|
+| `data/GAME1.DAT` … `GAME5.DAT` | Sequential | [`save-dat`](../data/save-dat.md) | Save slots, one record per slot |
+
 ### Workspace
 
 | Variable | Level | Type | Usage |
 |----------|-------|------|-------|
 | `WS-ACTION` | 01 | PIC 9(01) | Menu choice forwarded to PORT-SCREEN |
 | `WS-ARG` | 01 | PIC 9(10) | Argument forwarded to PORT-SCREEN |
+| `WS-SAVE-FILE-STATUS` | 01 | PIC XX | File status of the save file |
+| `WS-SLOT-NUMBER` | 01 | PIC 9(01) | Currently selected slot (1-5) |
+| `WS-FILE-NAME` | 01 | PIC X(30) | Built slot filename (`data/GAMEx.DAT`) |
+| `WS-LOAD-CHOICE` | 01 | PIC 9(01) | Startup choice: load (1) or new game (0) |
+| `WS-SLOT-OCCUPIED` | 01 | PIC X(01) OCCURS 5 | Per-slot occupied flag ('1' = has a save) |
+| `WS-SAVE-COUNT` | 01 | PIC 9(01) | Number of occupied slots |
+| `WS-VALID-SLOT-CHOSEN` | 01 | PIC 9(01) | Slot result: 1 = slot chosen, 2 = cancelled, 0 = still asking |
+| `WS-SLOT-INDEX` | 01 | PIC 9(10) | Loop index over the 5 slots |
+| `WS-PRICE-INDEX` | 01 | PIC 9(10) | Flattened price grid index `(port-1)×5+good` |
+| `WS-I`, `WS-J` | 01 | PIC 9(10) | Loop iteration indices |
+
+## Procedure
+
+Nine paragraphs, executed from the main flow:
+
+| Paragraph | Role | Arguments |
+|-----------|------|-----------|
+| `CHECK-EXISTING-SAVES` | Open each slot (INPUT), mark occupied, close; count occupied slots | none |
+| `DISPLAY-SAVE-LIST` | Print occupied slot numbers and save count | none |
+| `ASK-LOAD-SLOT` | Prompt for a slot to load, re-prompt until occupied or valid | none |
+| `ASK-SAVE-SLOT` | Prompt for a slot to save (0 = cancel), re-prompt until 0-5 | none |
+| `BUILD-FILE-NAME` | Build `WS-FILE-NAME` for the selected slot number | `WS-SLOT-NUMBER` |
+| `SAVE-GAME` | Open slot file (OUTPUT), write state record, close | `WS-FILE-NAME` |
+| `LOAD-GAME` | Open slot file (INPUT), read record, close | `WS-FILE-NAME` |
+| `RESTORE-STATE` | Copy the read record back into the mutable state | none |
+
+### CHECK-EXISTING-SAVES
+
+Attempts to open each slot 1-5 in `INPUT` mode. An open returning status `"35"` (file-not-found) means the slot is empty; any successful open marks the slot occupied and immediately closes it. Runs right after initialization so the startup flow knows whether to offer a load.
+
+### DISPLAY-SAVE-LIST
+
+Shows the occupied slots as a numbered list with the total count, then prompts for a load choice. Called at startup and from menu option 6.
+
+### ASK-LOAD-SLOT
+
+Prompts until the player picks 0 (cancel) or an occupied slot 1-5. An out-of-range number displays `"Slot invalide."` and re-prompts; an empty slot displays `"Ce slot est vide."` and re-prompts. Cancelling (0) leaves `WS-VALID-SLOT-CHOSEN` at 2 so the caller skips `LOAD-GAME`; an occupied slot sets it to 1.
+
+### ASK-SAVE-SLOT
+
+Prompts until the player picks 0 (cancel) or a slot 1-5. An out-of-range number displays `"Slot invalide."` and re-prompts. Cancelling (0) skips the save; a valid slot triggers `SAVE-GAME`. Used both by menu option 5 and by the quit prompt.
+
+### BUILD-FILE-NAME
+
+Builds `data/GAMEx.DAT` from the slot number. Uses the full form `data/GAME1.DAT` … `data/GAME5.DAT`.
+
+### SAVE-GAME
+
+Opens the slot file with `OUTPUT` (create/overwrite), writes one `save-dat` record, closes. On open failure the file is neither written nor closed.
+
+### LOAD-GAME
+
+Opens the slot file with `INPUT`, reads the single record, closes. On open failure (`"35"`) the fresh initialized state stays active.
+
+### RESTORE-STATE
+
+Copies the record read by `LOAD-GAME` back into the mutable game state (money, port, fuel, cargo, visited flags, price grid).
 
 ## Flow
 
 1. Initialize game state and tables via [`INITIALISATION`](API-Initialisation.md).
-2. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices. If the player chooses to quit, the game status becomes QUIT.
-3. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
-4. Terminate.
+2. Scan slots 1-5 and mark each occupied one. If any save exists, list the occupied slots and ask the player whether to load and which slot; if yes, restore the saved state via `LOAD-GAME` (overwrites the mutable state set by initialization). Only occupied slots are accepted.
+3. Repeatedly show the current port via [`PORT-SCREEN`](API-PortScreen.md) and process the player's choices.
+4. Menu option 5 (Save) prompts for a slot (0 = cancel) via `ASK-SAVE-SLOT` and writes the state via `SAVE-GAME`. Menu option 6 (Load) re-scans the slots, lists the occupied ones, asks which slot to restore, and loads it via `LOAD-GAME`; if no save exists it shows "Aucune sauvegarde disponible." and returns to the menu.
+5. On quit, the player is asked whether to save; `ASK-SAVE-SLOT` prompts for a slot (0 = no save) and `SAVE-GAME` writes the state, then the game status is set to QUIT.
+6. Once the loop ends (win, lose, or quit), display the result via [`END-SCREEN`](API-EndScreen.md).
+7. Terminate.
 
 ## Error Handling
 
-No error handling — [`PORT-SCREEN`](API-PortScreen.md) validates all inputs internally. The main program only intercepts the quit action.
+| Condition | Behavior |
+|-----------|----------|
+| `WS-SAVE-FILE-STATUS = "35"` on load | Display "Slot vide." — the fresh initialized state stays active |
+| `WS-SAVE-FILE-STATUS` other than "00" on read | Display "Lecture impossible." and close the file |
+| `WS-SAVE-FILE-STATUS` other than "00" on save open | Display "Echec de l'ouverture du fichier." — the file is neither written nor closed |
+| `WS-SAVE-FILE-STATUS` other than "00" on save write | Display "Echec de l'ecriture de la sauvegarde." and close the file |
+| `WS-SAVE-COUNT = 0` | No prompt — the game starts fresh from initialization |
+| Load requested but `WS-SAVE-COUNT = 0` | Display "Aucune sauvegarde disponible." and return to the menu |
+| Save or load prompt cancelled (0) | No file operation — current state stays |
+| Load slot chosen but not occupied | Display "Ce slot est vide." and re-prompt |
 
 ## Rules
 
+- `INITIALISATION` always runs first: it provides the static tables (port names, goods) that are not stored in the save record. Loading only overwrites the mutable state.
+- The price grid is stored flattened (port-major) in `WS-SAVE-GOODS-PRICES(1..25)`.
 - Quit is the only action handled by the main program itself — all other actions (navigation, buy, sell, refuel, lose condition, win condition) are processed inside [`PORT-SCREEN`](API-PortScreen.md).
+- Saving opens the file with `OUTPUT` (create/overwrite), loading with `INPUT`. A slot is skipped without closing if the open fails.
