@@ -44,11 +44,18 @@ function Assert-Output {
 }
 
 function Test-Step {
-    param($Name, $Inputs, $ExpectedPatterns)
+    param($Name, $Inputs, $ExpectedPatterns, $ExpectedFiles = @())
     Write-Host -NoNewline "  $Name ... "
     try {
         $out = Run-Game $Inputs
-        if (Assert-Output $out $ExpectedPatterns) {
+        $ok = Assert-Output $out $ExpectedPatterns
+        foreach ($f in $ExpectedFiles) {
+            if (-not (Test-Path -LiteralPath $f)) {
+                $ok = $false
+                Write-Host -NoNewline "(missing $f) "
+            }
+        }
+        if ($ok) {
             Write-Host "PASS" -ForegroundColor Green
             $script:PassCount++
         } else {
@@ -62,6 +69,15 @@ function Test-Step {
         Write-Host "FAIL (crash: $_ )" -ForegroundColor Red
         $script:FailCount++
     }
+}
+
+function Clear-Saves {
+    Remove-Item -Path "data\GAME*.DAT" -ErrorAction SilentlyContinue
+}
+
+function New-TestSave {
+    & ".\setup_env.ps1" 2>&1 | Out-Null
+    "2`n1`n1`n5`n1`n0`n0" | & $GameExe 2>&1 | Out-Null
 }
 
 function Test-Win-Adaptive {
@@ -268,6 +284,8 @@ if ($LASTEXITCODE -ne 0) { Write-Host "FAIL" -ForegroundColor Red; exit 1 }
 Write-Host " OK" -ForegroundColor Green
 Write-Host ""
 
+Clear-Saves
+
 # ============================================================
 # PHASE 1 — Edge cases + lose condition (deterministic)
 # ============================================================
@@ -314,6 +332,30 @@ Test-Step -Name "[9] Vente sans stock" `
 Test-Step -Name "[10] Navigation sans refuel puis LOSE" `
     -Inputs @("4","1","2","4","1","1","4","1","2","4","1","3","1") `
     -ExpectedPatterns @("GAME OVER", "Plus assez d'argent")
+
+Clear-Saves
+Test-Step -Name "[11] Sauvegarde via menu (slot 1)" `
+    -Inputs @("2", "1", "1", "5", "1", "0", "0") `
+    -ExpectedPatterns @("Sauvegarde effectuee dans le slot 1", "Partie quittee") `
+    -ExpectedFiles @("data/GAME1.DAT")
+Clear-Saves
+
+New-TestSave
+Test-Step -Name "[12] Chargement au demarrage (slot 1)" `
+    -Inputs @("1", "1", "0", "0") `
+    -ExpectedPatterns @("Parties sauvegardees", "Partie chargee", "Partie quittee")
+Clear-Saves
+
+New-TestSave
+Test-Step -Name "[13] Chargement en cours de partie (menu 6)" `
+    -Inputs @("0", "6", "1", "0", "0") `
+    -ExpectedPatterns @("Parties sauvegardees", "Partie chargee", "Partie quittee")
+Clear-Saves
+
+Clear-Saves
+Test-Step -Name "[14] Chargement sans sauvegarde (menu 6)" `
+    -Inputs @("6", "0", "0") `
+    -ExpectedPatterns @("Aucune sauvegarde disponible", "Partie quittee")
 
 Write-Host ""
 

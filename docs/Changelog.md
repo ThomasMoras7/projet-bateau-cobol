@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.1.0 — RUN 2 : Save / Load System
+
+### Added
+- 5 save slots: `data/GAME1.DAT` … `GAME5.DAT` (sequential files, one record per slot)
+- `save-dat` copybook for the save record (money, port, fuel, cargo, visited flags, flattened price grid)
+- Occupied-slot detection and listing at startup
+- Load prompt at startup; menu options 5 (Save) and 6 (Load); save prompt on quit
+- File-status handling on save open/write and load open/read (including "35" file-not-found)
+- `ASK-SAVE-SLOT` paragraph shared by the quit and menu save flows
+
+### Improved
+- `test-game.ps1` clears `data/GAME*.DAT` at start and after each save test to avoid interference
+- Test suite extended: 4 save/load integration tests (menu save + file check, startup load, mid-game load, no-save message) and automatic slot cleanup between runs
+
 ## v1.0.0 — RUN 1 : Navigation Basics
 
 ### Added
@@ -33,6 +47,4 @@
 ## v0.1.0 — Initial Prototype (banking, superseded)
 
 ### Added
-- Create, delete, and list bank accounts
-- Portable GnuCOBOL 3.2.0 environment with automatic data file creation
-- Project wiki in `docs/`
+- Account CRUD, portable GnuCOBOL 3.2.0 environment, project wiki in `docs/`

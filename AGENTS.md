@@ -23,11 +23,11 @@ cd bin; .\boat-game.exe  # Run
 - **Copybook names ≤ 8 characters** (GnuCOBOL fixed-format limit).
 - **JCL samples** in `docs/jcl/`. `.jcl` files — mainframe JCL for portfolio (not executable on this machine).
 - **`.gitignore`**: `*.exe`, `*.obj`, `gnu-cobol/**` excluded.
-- **Architecture**: Main program `game.cbl` + CALLed subprograms (`initialisation.cbl`, `port-screen.cbl`, `end-screen.cbl`), compiled together into one executable. **Open question**: subprograms may be merged into a single file depending on complexity.
-- **No `.DAT` files in RUN 1** — state is purely in-memory.
-- **Data files** (RUN 2+): `PORTS.DAT` indexed, `GAME.DAT` sequential. **Open question**: a single save file may suffice.
+- **Architecture**: Main program `game.cbl` + CALLed subprograms (`initialisation.cbl`, `port-screen.cbl`, `end-screen.cbl`), compiled together into one executable.
+- **State**: purely in-memory while playing.
+- **Saves** : 5 sequential files `data/GAME1.DAT`…`GAME5.DAT`, one record each (copybook `save-dat`). Load prompt at startup, menu options 5 (Save) / 6 (Load), save prompt on quit.
 
-## Lose condition (RUN 1)
+## Win / Lose
 
 Player loses when `money < fuel_cost` (50000) at the moment of trying to depart.
 Win: visit all 5 ports.

@@ -4,7 +4,7 @@
 
 ## Concept
 
-Turn-based maritime trading game in COBOL. Inherit a wreck, buy low and sell high across 5 ports, manage fuel costs. Roguelike one-sitting format with absurd humor.
+Turn-based maritime trading game in COBOL. Inherit a wreck, buy low and sell high across 5 ports, manage fuel costs.
 
 ## Core Loop
 
@@ -47,6 +47,10 @@ Binary state: empty (0) or full (1), starts empty. Refuel costs **50 000 $**. Na
 - **Win**: `WS-VISITED-PORTS-COUNT >= 5` (visit all 5 ports)
 - **Lose**: fuel empty, money < 50 000, player tries to navigate → `MOVE "LOST" TO WS-STATUS`
 - **Quit**: option 0 at any time
+
+## Persistence
+
+5 save slots, one sequential file per slot: `data/GAME1.DAT` … `GAME5.DAT`. A save stores the mutable state (money, current port, fuel, cargo, visited ports, price grid); static data (ports, goods) is rebuilt by `INITIALISATION` when loading. Save via menu option 5 or the quit prompt; load via menu option 6 or the startup prompt. Only occupied slots can be loaded.
 
 ## Code
 
